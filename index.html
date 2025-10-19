@@ -18,13 +18,14 @@
             --danger-red: #dc3545;
             --grey: #6c757d;
 
-            /* --- Theme Variables --- */
+            /* --- Theme Variables (DEFAULT: DARK) --- */
             --bg-main: #121212;
             --bg-light: #1e1e1e;
             --bg-lighter: #2a2a2a;
             --text-primary: #ffffff;
             --text-secondary: #b3b3b3;
             --border-color: #444;
+            --hero-bg-url: url('stadium.jpg'); /* Default background */
         }
 
         body[data-theme="light"] {
@@ -42,6 +43,8 @@
             color: var(--text-primary);
             transition: background-color 0.3s ease, color 0.3s ease;
             overflow-x: hidden;
+            /* FIX: Ensure background covers full mobile viewport */
+            min-height: 100vh;
         }
 
         /* --- Navbar --- */
@@ -94,7 +97,6 @@
             font-size: 1.1rem;
             line-height: 1;
         }
-
         /* --- Live Ticker --- */
         .live-ticker {
             background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
@@ -113,7 +115,8 @@
 
         /* --- Hero Section --- */
         .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), url('stadium.jpg');
+            /* Now uses the CSS variable which will be set by JS */
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), var(--hero-bg-url);
             background-size: cover;
             background-position: center;
             color: white;
@@ -391,8 +394,13 @@
             transition: border-color 0.3s ease;
         }
         .btn-close {
+            /* Fix for light theme */
             filter: var(--text-primary) == '#ffffff' ? invert(1) : none;
         }
+        body[data-theme="light"] .btn-close {
+             filter: none;
+        }
+
         .form-control, .form-select {
             background-color: var(--bg-main);
             border-color: var(--border-color);
@@ -470,11 +478,11 @@
                     <li class="nav-item"><a class="nav-link" href="#players">Players</a></li>
                     <li class="nav-item"><a class="nav-link" href="#prizes">Prizes</a></li>
                     <li class="nav-item">
-                        <button class="btn nav-link" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                        <button class="btn nav-link" id="theme-toggle" aria-label="Toggle theme">
                             <i class="fa-solid fa-sun"></i> </button>
                     </li>
                     <li class="nav-item">
-                        <button class="btn btn-outline-primary ms-2" onclick="showAdminLogin()">
+                        <button class="btn btn-outline-primary ms-2" id="admin-login-button">
                             <i class="fa-solid fa-lock me-1"></i> Admin
                         </button>
                     </li>
@@ -508,6 +516,33 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" onclick="loginAdmin()">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="editBackgroundModal" tabindex="-1" aria-labelledby="editBackgroundModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editBackgroundModalLabel">Edit Hero Background</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="backgroundFile" class="form-label">Upload Image from Gallery</label>
+                        <input type="file" id="backgroundFile" class="form-control" accept="image/png, image/jpeg, image/webp">
+                    </div>
+                    <div class="text-center text-secondary my-2">OR (URL takes precedence if provided)</div>
+                    <div class="mb-3">
+                        <label for="backgroundUrl" class="form-label">Background Image URL (Optional)</label>
+                        <input type="url" id="backgroundUrl" class="form-control" placeholder="Paste image URL (e.g., https://example.com/stadium.jpg)" aria-label="Background URL">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-warning" onclick="resetBackground()">Reset to Default</button>
+                    <button type="button" class="btn btn-primary" onclick="submitBackground()">Set Background</button>
                 </div>
             </div>
         </div>
@@ -636,6 +671,9 @@
                 <button class="btn btn-primary me-2" onclick="showAddPlayerModal()">
                     <i class="fa-solid fa-user-plus me-1"></i> Add Player
                 </button>
+                <button class="btn btn-info me-2 text-white" onclick="showEditBackgroundModal()">
+                    <i class="fa-solid fa-image me-1"></i> Edit Background
+                </button>
                 <button class="btn btn-danger" onclick="resetLeague()">
                     <i class="fa-solid fa-trash me-1"></i> Reset League
                 </button>
@@ -733,11 +771,10 @@
     <script>
         // ================================================================
         //
-        
         // ================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyCLycBxpQ3MMIDLYjmBqMZv32FIu2eDXF4", // <--- REPLACE
-            authDomain: "efootball-app-ce90b.firebaseapp.com"", // <--- REPLACE
+            authDomain: "efootball-app-ce90b.firebaseapp.com", // <--- REPLACE
             projectId: "efootball-app-ce90b", // <--- REPLACE
             storageBucket: "efootball-app-ce90b.firebasestorage.app", // <--- REPLACE
             messagingSenderId: "387933114333", // <--- REPLACE
@@ -749,7 +786,7 @@
         const db = firebase.firestore();
 
         const password = "Genie"; // Your admin password
-        let leagueData = { players: [], fixtures: [], results: [] };
+        let leagueData = { players: [], fixtures: [], results: [], backgroundUrl: 'url("stadium.jpg")' }; // ADD backgroundUrl
         let currentMatchday = 1;
         let totalMatchdays = 1;
         let isAdmin = false;
@@ -757,7 +794,7 @@
         // NEW: Default SVG avatar (replaces placeholder.com)
         const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%236c757d'%3E%3Cpath d='M50,0A50,50,0,1,0,50,100,50,50,0,0,0,50,0ZM50,15A35,35,0,1,1,15,50,35,35,0,0,1,50,15ZM50,25A10,10,0,1,1,40,35,10,10,0,0,1,50,25ZM50,80a27,27,0,0,1-25-12.87c.2-8.3,16.72-12.93,25-12.93s24.8,4.63,25,12.93A27,27,0,0,1,50,80Z'/%3E%3C/svg%3E";
 
-        // --- NEW: Theme Toggle Logic ---
+        // --- NEW/FIXED: Theme Toggle Logic ---
         const themeToggle = document.getElementById('theme-toggle');
         
         function applyTheme(theme) {
@@ -773,17 +810,27 @@
         }
         
         function toggleTheme() {
-            const currentTheme = localStorage.getItem('theme') || 'dark';
-            applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+            const currentTheme = localStorage.getItem('theme') || 'light'; // Default to light
+            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
         }
         
         // Apply saved theme on page load
         document.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('theme') || 'dark';
+            // FIX: Attach listeners here
+            themeToggle.addEventListener('click', toggleTheme);
+            document.getElementById('admin-login-button').addEventListener('click', showAdminLogin);
+
+            // FIX: Change default theme to 'light'
+            const savedTheme = localStorage.getItem('theme') || 'light';
             applyTheme(savedTheme);
             loadData(); // Load Firebase data after theme is set
         });
         // --- End Theme Logic ---
+
+        // Apply Background Style
+        function applyBackground() {
+            document.documentElement.style.setProperty('--hero-bg-url', leagueData.backgroundUrl || 'url("stadium.jpg")');
+        }
 
         // Load data from Firebase
         async function loadData() {
@@ -794,9 +841,11 @@
                     if (!leagueData.players) leagueData.players = [];
                     if (!leagueData.fixtures) leagueData.fixtures = [];
                     if (!leagueData.results) leagueData.results = [];
+                    if (!leagueData.backgroundUrl) leagueData.backgroundUrl = 'url("stadium.jpg")'; // Set default if missing
                 } else {
                     await saveData(false); // Don't show toast on first-time save
                 }
+                applyBackground(); // Apply loaded background
                 updateViews();
                 populateTeamSelector();
                 populateFixtureSelectors();
@@ -821,6 +870,8 @@
                 showToast('Error saving data! Check Firebase rules.', 'danger');
             }
         }
+
+        // ... (updateViews, calculateTotalMatchdays, updateLiveTicker, showToast functions remain the same) ...
 
         // Update all views
         function updateViews() {
@@ -855,7 +906,7 @@
         function showToast(message, type = 'success') {
             const toastContainer = document.createElement('div');
             toastContainer.className = 'toast-container';
-            const bgClass = type === 'danger' ? 'bg-danger' : (type === 'success' ? 'bg-success' : 'bg-primary');
+            const bgClass = type === 'danger' ? 'bg-danger' : (type === 'success' ? 'bg-success' : (type === 'info' ? 'bg-info' : 'bg-primary'));
             toastContainer.innerHTML = `
                 <div class="toast align-items-center text-white ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true">
                     <div class="d-flex">
@@ -869,7 +920,7 @@
             toast.show();
             setTimeout(() => toastContainer.remove(), 3500);
         }
-
+        
         // Calculate Player Form
         function calculatePlayerForm(playerId) {
             const playerFixtures = leagueData.fixtures
@@ -1125,12 +1176,85 @@
             bootstrap.Modal.getInstance(document.getElementById('adminModal')).hide();
         }
 
+        // NEW: Background file to Base64 function (for background image - no resize)
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    // Store as a CSS url() string using Base64 data URI
+                    resolve(`url('${e.target.result}')`); 
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // UPDATED: Admin Background Functions
+        function showEditBackgroundModal() {
+            if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
+            
+            // Clear existing file input
+            document.getElementById('backgroundFile').value = ''; 
+
+            // Clean up the current URL for display in the input box
+            let currentUrl = leagueData.backgroundUrl;
+            if (currentUrl && currentUrl !== 'url("stadium.jpg")') {
+                 // Remove url('', "") wrappers for display in input field
+                document.getElementById('backgroundUrl').value = currentUrl.replace(/url\(["']?|["']?\)/g, ''); 
+            } else {
+                document.getElementById('backgroundUrl').value = ''; 
+            }
+            
+            new bootstrap.Modal(document.getElementById('editBackgroundModal')).show();
+        }
+
+        async function submitBackground() {
+            if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
+            
+            const url = document.getElementById('backgroundUrl').value.trim();
+            const file = document.getElementById('backgroundFile').files[0];
+            let newBackgroundUrl = '';
+
+            if (file) {
+                try {
+                    showToast('Uploading and processing background image...', 'info');
+                    // Convert file to base64 url() string
+                    newBackgroundUrl = await fileToBase64(file); 
+                } catch (error) {
+                    console.error("Error processing file:", error);
+                    showToast('Could not process image file. Try a different image.', 'danger');
+                    return;
+                }
+            } else if (url) {
+                // Use the provided URL, correctly enclosed in url('')
+                newBackgroundUrl = `url('${url}')`;
+            } else {
+                // If neither is provided, reset to default
+                newBackgroundUrl = 'url("stadium.jpg")';
+                showToast('Resetting background to default stadium image.', 'info');
+            }
+
+            leagueData.backgroundUrl = newBackgroundUrl;
+            applyBackground();
+            await saveData();
+            bootstrap.Modal.getInstance(document.getElementById('editBackgroundModal')).hide();
+        }
+        
+        async function resetBackground() {
+            if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
+            leagueData.backgroundUrl = 'url("stadium.jpg")'; // Reset to the CSS default in the style block
+            applyBackground();
+            await saveData();
+            bootstrap.Modal.getInstance(document.getElementById('editBackgroundModal')).hide();
+            showToast('Background reset to default!', 'success');
+        }
+
         function showAddPlayerModal() {
             if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
             new bootstrap.Modal(document.getElementById('addPlayerModal')).show();
         }
         
-        // --- NEW: Image Resizer ---
+        // --- NEW: Image Resizer (Remains the same for player avatars) ---
         // Converts a file to a Base64 WebP image
         function resizeAndConvertImage(file, maxSize = 128) {
             return new Promise((resolve, reject) => {
@@ -1175,7 +1299,7 @@
             });
         }
 
-        // --- UPDATED: submitPlayer (handles File Upload) ---
+        // --- UPDATED: submitPlayer (Remains the same) ---
         async function submitPlayer() {
             if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
             
@@ -1249,7 +1373,7 @@
             bootstrap.Modal.getInstance(document.getElementById('addFixtureModal')).hide();
         }
 
-        // --- UPDATED: enterResult (pre-fills modal) ---
+        // --- UPDATED: enterResult (pre-fills modal - Remains the same) ---
         function enterResult(fixtureId) {
             if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
             
@@ -1271,7 +1395,7 @@
             new bootstrap.Modal(document.getElementById('resultModal')).show();
         }
 
-        // --- UPDATED: submitResult (handles editing) ---
+        // --- UPDATED: submitResult (handles editing - Remains the same) ---
         async function submitResult() {
             if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
             const fixtureId = parseInt(document.getElementById('resultFixtureId').value);
@@ -1315,7 +1439,7 @@
             bootstrap.Modal.getInstance(document.getElementById('resultModal')).hide();
         }
 
-        // Helper to reverse stats
+        // Helper to reverse stats (Remains the same)
         function reverseStatsFromResult(fixtureId, result) {
             const fixture = leagueData.fixtures.find(f => f.id === fixtureId);
             if (!fixture) return;
@@ -1336,7 +1460,7 @@
             }
         }
 
-        // Delete Player
+        // Delete Player (Remains the same)
         async function deletePlayer(id) {
             if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
             if (confirm('Delete this player? This will remove all their fixtures and results.')) {
@@ -1358,7 +1482,7 @@
             }
         }
 
-        // Delete Fixture
+        // Delete Fixture (Remains the same)
         async function deleteFixture(id) {
             if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
             if (confirm('Delete this fixture? If it has a result, stats will be reversed.')) {
@@ -1373,7 +1497,7 @@
             }
         }
 
-        // Delete Result
+        // Delete Result (Remains the same)
         async function deleteResult(fixtureId) {
             if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
             if (confirm('Delete this result? Player stats will be reversed.')) {
@@ -1388,7 +1512,7 @@
             }
         }
 
-        // Generate Fixtures
+        // Generate Fixtures (Remains the same)
         async function generateFixtures() {
             if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
             if (leagueData.players.length < 2) {
@@ -1441,7 +1565,7 @@
             showToast(`Generated ${fixtures.length} fixtures over ${numRounds} matchdays!`, 'success');
         }
 
-        // Change Matchday
+        // Change Matchday (Remains the same)
         function changeMatchday(delta) {
             const newMatchday = currentMatchday + delta;
             if (newMatchday < 1 || newMatchday > totalMatchdays) return;
@@ -1456,7 +1580,7 @@
             }, 300);
         }
 
-        // Show Player Profile
+        // Show Player Profile (Remains the same)
         function showPlayerProfile(id) {
             const player = leagueData.players.find(p => p.id === id);
             if (!player) { showToast('Player not found!', 'danger'); return; }
@@ -1512,20 +1636,21 @@
             modalEl.addEventListener('hidden.bs.modal', () => modalEl.remove());
         }
 
-        // Reset League
+        // Reset League (Remains the same)
         async function resetLeague() {
             if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
             if (confirm('Delete all league data? This cannot be undone!')) {
-                leagueData = { players: [], fixtures: [], results: [] };
+                leagueData = { players: [], fixtures: [], results: [], backgroundUrl: 'url("stadium.jpg")' };
                 currentMatchday = 1;
                 totalMatchdays = 1;
                 await saveData();
                 populateTeamSelector();
                 populateFixtureSelectors();
+                applyBackground(); // Reset background on league reset
             }
         }
 
-        // Import/Export
+        // Import/Export (Remains the same)
         async function importData() {
             if (!isAdmin) { showToast('Admin only!', 'danger'); return; }
             const json = document.getElementById('dataJson').value;
@@ -1536,10 +1661,12 @@
                     showToast('Invalid JSON structure!', 'danger'); return;
                 }
                 leagueData = data;
+                if(!leagueData.backgroundUrl) leagueData.backgroundUrl = 'url("stadium.jpg")'; // Ensure background field exists
                 await saveData();
                 populateTeamSelector();
                 populateFixtureSelectors();
                 calculateTotalMatchdays();
+                applyBackground();
                 showToast('Data imported successfully!', 'success');
             } catch (e) {
                 showToast('Invalid JSON! ' + e.message, 'danger');
