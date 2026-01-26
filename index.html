@@ -12,62 +12,71 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
 
     <style>
+        /* PERMANENT LIGHT THEME VARIABLES */
         :root {
-            --primary-color: #90ff10;
-            --secondary-color: #beff6c;
+            --primary-color: #008f5a; 
+            --secondary-color: #00b371;
             --danger-red: #ff4d4d;
-            --bg-main: #181818; 
-            --bg-light: #222222; 
-            --bg-lighter: #2a2a2a;
-            --text-primary: #ffffff;
-            --text-secondary: #aaaaaa;
-            --border-color: #3a3a3a;
-            --hero-bg-url: url('stadium.jpg'); 
-        }
-
-        body[data-theme="light"] {
+            
             --bg-main: #f0f2f5;
             --bg-light: #ffffff;
             --bg-lighter: #f8f9fa;
+            
             --text-primary: #181818;
             --text-secondary: #555555;
+            
             --border-color: #dee2e6;
-            --primary-color: #008f5a; 
-            --secondary-color: #00b371;
+            --hero-bg-url: url('stadium.jpg'); 
         }
 
         body { font-family: 'Roboto', sans-serif; background-color: var(--bg-main); color: var(--text-primary); transition: 0.3s; overflow-x: hidden; min-height: 100vh; padding-bottom: 70px; }
         
         /* Navbar */
-        .custom-navbar { background-color: var(--bg-light); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000; padding: 0.5rem 0; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .custom-navbar { background-color: var(--bg-light); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000; padding: 0.5rem 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .custom-nav-container { display: flex; align-items: center; padding: 0 15px; gap: 15px; overflow-x: auto; white-space: nowrap; }
         .custom-nav-brand { font-size: 1.2rem; font-weight: 900; color: var(--primary-color); margin-right: 15px; text-decoration: none; }
         .custom-nav-item { color: var(--text-secondary); font-weight: 500; text-decoration: none; padding: 8px 12px; border-radius: 20px; transition: 0.3s; font-size: 0.9rem; text-transform: uppercase; }
-        .custom-nav-item:hover, .custom-nav-item.active { background-color: rgba(144, 255, 16, 0.1); color: var(--primary-color); }
+        .custom-nav-item:hover, .custom-nav-item.active { background-color: rgba(0, 143, 90, 0.1); color: var(--primary-color); }
 
-        /* Hero */
-        .hero { background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.8)), var(--hero-bg-url); background-size: cover; background-position: center; color: white; text-align: center; padding: 60px 60px; border-bottom: 2px solid var(--primary-color); transition: background-image 0.5s ease-in-out; }
-        .hero h1 { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; }
+        /* Hero Section - UPDATED for White Text */
+        .hero { 
+            /* Dark overlay to make white text pop */
+            background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.8)), var(--hero-bg-url); 
+            background-size: cover; 
+            background-position: center; 
+            color: #ffffff; 
+            text-align: center; 
+            padding: 80px 20px; 
+            border-bottom: 4px solid var(--primary-color); 
+            transition: background-image 0.5s ease-in-out; 
+        }
+        .hero h1 { 
+            font-size: 2.5rem; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            color: #ffffff; 
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
 
         /* ADS SYSTEM STYLES */
-        .ads-section { background: var(--bg-lighter); padding: 15px 0; border-bottom: 1px solid var(--border-color); overflow: hidden; position: relative; min-height: 120px; display: flex; align-items: center; }
+        .ads-section { background: var(--bg-light); padding: 15px 0; border-bottom: 1px solid var(--border-color); overflow: hidden; position: relative; min-height: 120px; display: flex; align-items: center; }
         .ad-container { width: 100%; max-width: 800px; margin: 0 auto; text-align: center; animation: fadeInAd 0.5s ease-in-out; }
         @keyframes fadeInAd { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .ad-content { display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap; }
-        .ad-image { max-height: 180px; max-width: 520px; border-radius: 5px; object-fit: contain; background: white; padding: 2px; }
+        .ad-image { max-height: 180px; max-width: 520px; border-radius: 5px; object-fit: contain; background: white; padding: 2px; border: 1px solid var(--border-color); }
         .ad-text h5 { margin: 0; color: var(--primary-color); font-weight: 700; font-size: 1.1rem; }
         .ad-text p { margin: 0; font-size: 0.9rem; color: var(--text-secondary); max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .mini-ads-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
-        .mini-ad { background: var(--bg-lighter); border: 1px solid var(--border-color); padding: 5px 10px; border-radius: 4px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; max-width: 200px; }
+        .mini-ad { background: var(--bg-light); border: 1px solid var(--border-color); padding: 5px 10px; border-radius: 4px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; max-width: 200px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .mini-ad:hover { border-color: var(--primary-color); transform: translateY(-2px); }
         .mini-ad img { width: 60px; height: 80px; object-fit: contain; border-radius: 2px; }
         .mini-ad span { font-size: 0.75rem; color: var(--text-secondary); font-weight: bold; }
 
         /* General UI */
         .section-title { color: var(--primary-color); font-weight: 700; font-size: 1.8rem; margin-bottom: 20px; text-transform: uppercase; text-align: center; }
-        .card { background-color: var(--bg-light); border: 1px solid var(--border-color); color: var(--text-primary); }
+        .card { background-color: var(--bg-light); border: 1px solid var(--border-color); color: var(--text-primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .nav-pills .nav-link { color: var(--text-secondary); background-color: var(--bg-lighter); margin: 0 5px; border: 1px solid var(--border-color); }
-        .nav-pills .nav-link.active { background-color: var(--primary-color); color: var(--bg-main); font-weight: 700; }
+        .nav-pills .nav-link.active { background-color: var(--primary-color); color: white; font-weight: 700; border-color: var(--primary-color); }
         
         /* League Table */
         .league-table { background-color: var(--bg-light); color: var(--text-primary); }
@@ -77,21 +86,25 @@
         .group-title { font-weight: 900; font-size: 1.5rem; color: var(--primary-color); text-transform: uppercase; margin: 0; }
 
         /* Matches */
-        .match-card { background-color: var(--bg-lighter); border-radius: 15px; padding: 1rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; position: relative; border-left: 5px solid var(--primary-color); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .match-card { background-color: var(--bg-light); border-radius: 15px; padding: 1rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; position: relative; border-left: 5px solid var(--primary-color); box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border-color); border-left-width: 5px; }
         .match-card.knockout { border-left-color: var(--danger-red); background: linear-gradient(90deg, rgba(255, 77, 77, 0.05), transparent); }
-        .match-player img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; margin: 0 5px; border: 2px solid var(--border-color); }
-        .match-player { display: flex; align-items: center; width: 40%; font-size: 0.9rem; font-weight: 500; }
-        .match-center { width: 20%; text-align: center; }
+        .match-player img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin: 0 5px; border: 2px solid var(--border-color); }
+        .match-player { display: flex; align-items: center; width: 35%; font-size: 0.9rem; font-weight: 500; }
+        .match-center { width: 30%; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .match-score { font-size: 1.4rem; font-weight: 900; letter-spacing: 2px; }
         
+        /* Helper Classes */
         .admin-mode, .sub-admin-mode { display: none; }
         .contact-btn { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 2px; color: white; text-decoration: none; font-size: 0.7rem; }
         .btn-wa { background-color: #25D366; } .btn-call { background-color: #007bff; }
+        .btn-xs { padding: 1px 5px; font-size: 0.7rem; }
+        .instruction-box { font-size: 0.85rem; line-height: 1.4; border-left: 4px solid var(--primary-color) !important; text-align: left; }
 
         @media (max-width: 768px) {
-            .match-player { flex-direction: column; text-align: center; gap: 5px; }
+            .match-player { flex-direction: column; text-align: center; gap: 5px; width: 30%; }
             .match-player img { width: 40px; height: 40px; }
             .match-card { padding: 10px 5px; }
+            .match-center { width: 40%; }
         }
     </style>
 </head>
@@ -105,15 +118,15 @@
             <a href="#league-section" class="custom-nav-item active"><i class="fa-solid fa-layer-group"></i> Tournament</a>
             <a href="#players" class="custom-nav-item"><i class="fa-solid fa-users"></i> Players</a>
             <a href="#trophyRoom" class="custom-nav-item"><i class="fa-solid fa-award"></i> History</a>
-            <button class="btn btn-sm btn-outline-light ms-auto" id="theme-toggle"><i class="fa-solid fa-sun"></i></button>
-            <button class="btn btn-sm btn-outline-primary ms-2" id="admin-login-button"><i class="fa-solid fa-lock"></i></button>
+            
+            <button class="btn btn-sm btn-outline-primary ms-auto" id="admin-login-button"><i class="fa-solid fa-lock"></i></button>
             <button class="btn btn-sm btn-outline-danger ms-2 admin-mode" onclick="showPendingModal()">
                 <i class="fa-solid fa-inbox"></i> <span id="pendingCountBadge" class="badge bg-danger rounded-pill" style="display:none">0</span>
             </button>
         </div>
     </nav>
 
-    <div id="liveTicker" style="background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); color: var(--bg-main); padding: 5px; font-weight: 700; white-space: nowrap; overflow: hidden;">
+    <div id="liveTicker" style="background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); color: white; padding: 5px; font-weight: 700; white-space: nowrap; overflow: hidden;">
         <span class="live-ticker-content" id="tickerContent" style="display: inline-block; animation: tickerSlide 35s linear infinite;">Loading...</span>
     </div>
     <style>@keyframes tickerSlide { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }</style>
@@ -121,7 +134,7 @@
     <section class="hero">
         <div class="container">
             <h1 id="heroTitle">LOADING...</h1>
-            <p class="lead">GROUP STAGE & KNOCKOUT TOURNAMENT</p>
+            <p class="lead text-white" style="font-weight: 500;">GROUP STAGE & KNOCKOUT TOURNAMENT</p>
         </div>
     </section>
 
@@ -173,7 +186,7 @@
 
                     <div class="d-flex justify-content-center align-items-center gap-3 mb-3">
                         <button class="btn btn-sm btn-primary" onclick="changeMatchday(-1)"><i class="fa-solid fa-arrow-left"></i></button>
-                        <h4 id="currentMatchdayDisplay" class="m-0 text-uppercase">Matchday 1</h4>
+                        <h4 id="currentMatchdayDisplay" class="m-0 text-uppercase text-dark">Matchday 1</h4>
                         <button class="btn btn-sm btn-primary" onclick="changeMatchday(1)"><i class="fa-solid fa-arrow-right"></i></button>
                     </div>
 
@@ -190,7 +203,7 @@
         </div>
     </section>
 
-    <section id="players" class="py-5 bg-light">
+    <section id="players" class="py-5 bg-white">
         <div class="container">
             <h2 class="section-title">Players</h2>
              <div id="players-mini-ads" class="mini-ads-row"></div>
@@ -211,7 +224,7 @@
             <div class="modal-content" style="background: var(--bg-light); color: var(--text-primary); border: 1px solid var(--primary-color);">
                 <div class="modal-header border-0">
                     <h5 class="modal-title fw-bold" id="adModalTitle">Sponsor</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-center">
                     <img id="adModalImg" src="" class="img-fluid rounded mb-3" style="max-height: 200px; display:none;">
@@ -232,10 +245,32 @@
 
     <div class="modal fade" id="pendingModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Pending Results</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="d-flex justify-content-end mb-2"><button class="btn btn-success fw-bold" onclick="approveAllPending()">APPROVE ALL</button></div><div id="pendingListContent" style="max-height: 50vh; overflow-y: auto;"></div></div></div></div></div>
 
-    <div class="modal fade" id="sessionTeamModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Select Your Team</h5></div><div class="modal-body text-center"><select id="sessionTeamSelect" class="form-select mb-3"><option value="">-- Choose Team --</option></select><button class="btn btn-primary w-100" onclick="setSessionTeam()">Select Team</button><button class="btn btn-outline-secondary w-100 mt-2" onclick="skipSessionTeam()">View Only</button></div></div></div></div>
+    <div class="modal fade" id="sessionTeamModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fa-solid fa-circle-info"></i> Welcome / Karibu</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="instruction-box mb-3 p-2 border rounded bg-light">
+                        <p class="mb-1"><strong>English:</strong> Select your team name from the list below to enable the "Submit Results" feature for your matches. If you are just visiting, click "View Only".</p>
+                        <hr class="my-1">
+                        <p class="mb-0 text-muted"><strong>Swahili:</strong> Chagua jina la timu yako kwenye orodha hapa chini ili uweze kutuma matokeo ya mechi zako. Kama unakuja kuangalia tu, bonyeza "View Only".</p>
+                    </div>
+                    <select id="sessionTeamSelect" class="form-select mb-3">
+                        <option value="">-- Choose Your Team / Chagua Timu --</option>
+                    </select>
+                    <button class="btn btn-primary w-100 fw-bold" onclick="setSessionTeam()">SET MY TEAM / CHAGUA</button>
+                    <button class="btn btn-link w-100 mt-2 text-decoration-none text-muted" onclick="skipSessionTeam()">View Only / Angalia Tu</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div class="modal fade" id="addPlayerModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add Player</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="playerName" class="form-control mb-2" placeholder="Name"><input type="url" id="playerAvatarUrl" class="form-control mb-2" placeholder="Avatar URL"><input type="url" id="playerSocialLink" class="form-control mb-2" placeholder="WhatsApp Link"><input type="tel" id="playerPhone" class="form-control" placeholder="Phone Number"></div><div class="modal-footer"><button class="btn btn-primary" onclick="submitPlayer()">Add</button></div></div></div></div>
     
+    <div class="modal fade" id="editPlayerModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Edit Player</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="hidden" id="editPlayerId"><input type="text" id="editPlayerName" class="form-control mb-2" placeholder="Name"><input type="url" id="editPlayerAvatarUrl" class="form-control mb-2" placeholder="Avatar URL"><input type="url" id="editPlayerSocialLink" class="form-control mb-2" placeholder="WhatsApp Link"><input type="tel" id="editPlayerPhone" class="form-control" placeholder="Phone Number"></div><div class="modal-footer"><button class="btn btn-primary" onclick="submitEditPlayer()">Save Changes</button></div></div></div></div>
+
     <div class="modal fade" id="editBackgroundModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Background</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="url" id="backgroundUrl" class="form-control" placeholder="Image URL"></div><div class="modal-footer"><button class="btn btn-primary" onclick="submitBackground()">Save</button></div></div></div></div>
     
     <div class="modal fade" id="addFixtureModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add Fixture</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><select id="fixturePlayer1" class="form-select mb-2"></select><select id="fixturePlayer2" class="form-select mb-2"></select><input type="date" id="fixtureDate" class="form-control mb-2"><input type="number" id="fixtureMatchday" class="form-control" placeholder="Matchday" value="1"><select id="fixtureStage" class="form-select"><option value="group">Group Stage</option><option value="Semi-Final">Semi-Final</option><option value="Final">Final</option></select></div><div class="modal-footer"><button class="btn btn-primary" onclick="submitFixture()">Add</button></div></div></div></div>
@@ -252,7 +287,7 @@
                 desc: "Karbu ujipatie mabando ya bei chei , pesa kidogo GB kama zoote 👑 muda wowote , n Mwezi hadu mwaka mzima 🔥",
                 contact: {
                     whatsapp: "https://wa.me/255755532988",
-                 //   phone: "+255755532988",
+                  //  phone: "+255755532988",
                     //website: 
                 }
             },
@@ -263,7 +298,7 @@
                 desc: " Usipoteze pesa ndefu kununua mabando madogo madogo kila sku 🔥✨",
                 contact: {
                 whatsapp: "https://wa.me/255755532988",
-             //   phone: "+255755532988",
+              //  phone: "+255755532988",
                     //website: "https://example.com/energy"
                     }
                 },
@@ -274,7 +309,7 @@
                 desc: " Kifurushi chochote , dakika , sms , GB  etc vyote vya MWEZ MZIMA HATA MWAKA UKITAKA🔥✨",
                 contact: {
                 whatsapp: "https://wa.me/255755532988",
-                //phone: "+255755532988",
+                phone: "+255755532988",
                     //website: "https://example.com/energy"
                 }
             }
@@ -289,12 +324,12 @@
         let appData = { 
             season: 1, 
             history: [], 
-            players: [], // Player now has { ..., groupId: 'A' | 'B' }
-            fixtures: [], // Fixture now has { ..., stage: 'group'|'Semi-Final'|'Final', group: 'A'|'B' }
+            players: [], 
+            fixtures: [], 
             results: [], 
             resultsPending: [],
             backgroundUrl: 'url("stadium.jpg")',
-            currentStage: 'group' // 'group', 'knockout'
+            currentStage: 'group' 
         };
 
         let currentGroupView = 'A';
@@ -307,7 +342,6 @@
 
         // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
-            setupTheme();
             setupAds();
             loadData();
             document.getElementById('admin-login-button').addEventListener('click', () => new bootstrap.Modal(document.getElementById('adminModal')).show());
@@ -327,9 +361,8 @@
             const ad = ADS_CONFIG[currentAdIndex];
             if(!ad) return;
             const container = document.getElementById('adContainer');
-            // Re-trigger animation
             container.style.animation = 'none';
-            container.offsetHeight; /* trigger reflow */
+            container.offsetHeight; 
             container.style.animation = null; 
             
             container.innerHTML = `
@@ -350,7 +383,6 @@
                 const el = document.getElementById(tid);
                 if(!el) return;
                 el.innerHTML = '';
-                // Take first 3 ads
                 ADS_CONFIG.slice(0,3).forEach(ad => {
                     el.innerHTML += `
                         <div class="mini-ad" onclick="openAdModal(${ad.id})">
@@ -385,13 +417,11 @@
         // --- DATA LOGIC ---
         async function loadData() {
             try {
-                // FIXED: Reverted to 'data' to load your existing previous players/background
                 const doc = await db.collection('league').doc('data').get();
                 if (doc.exists) {
                     const loadedData = doc.data();
                     appData = { ...appData, ...loadedData };
                     
-                    // Migration Check: If loaded players don't have groupId (from old version), add null
                     if(appData.players) {
                         appData.players.forEach(p => {
                             if(typeof p.groupId === 'undefined') p.groupId = null;
@@ -426,7 +456,7 @@
         // --- GROUP & LEAGUE LOGIC ---
         function switchGroupView(dir) {
             if(dir === 'next') currentGroupView = currentGroupView === 'A' ? 'B' : 'A';
-            else currentGroupView = currentGroupView === 'A' ? 'B' : 'A'; // Only 2 groups, so prev/next toggle same way
+            else currentGroupView = currentGroupView === 'A' ? 'B' : 'A'; 
             updateStandings();
         }
 
@@ -454,7 +484,6 @@
             const tbody = document.getElementById('standingsTable');
             tbody.innerHTML = '';
             
-            // Filter by current group and Sort
             const groupPlayers = appData.players
                 .filter(p => p.groupId === currentGroupView)
                 .sort((a,b) => b.pts - a.pts || (b.gf-b.ga) - (a.gf-a.ga) || b.gf - a.gf);
@@ -467,7 +496,7 @@
                         <td class="d-flex align-items-center"><img src="${p.avatar}" style="width:25px;height:25px;border-radius:50%;margin-right:5px;"> ${p.name}</td>
                         <td>${p.mp}</td><td>${p.w}</td><td>${p.d}</td><td>${p.l}</td>
                         <td>${p.gf}</td><td>${p.ga}</td><td>${gd>0?'+'+gd:gd}</td>
-                        <td class="fw-bold text-warning">${p.pts}</td>
+                        <td class="fw-bold text-dark">${p.pts}</td>
                     </tr>
                 `;
             });
@@ -477,24 +506,18 @@
 
         // --- FIXTURES LOGIC ---
         function changeMatchday(delta) {
-            // Find max matchday or round
-            // Simply update index and re-render. Logic handles displaying "Round of 16" etc based on index mapping if needed
-            // For simplicity in this requirement, we group by matchday (numbers) and rounds (strings)
-            // We will just iterate through available unique matchdays/stages
             const uniqueStages = [...new Set(appData.fixtures.map(f => f.matchday || f.stage))];
-            // Sort: Numbers first, then strings
             uniqueStages.sort((a,b) => {
                 const isANum = !isNaN(a), isBNum = !isNaN(b);
                 if(isANum && isBNum) return a - b;
                 if(isANum) return -1;
                 if(isBNum) return 1;
-                // Custom order for strings
                 const order = {'group':0, 'Round of 16':1, 'Quarter-Final':2, 'Semi-Final':3, 'Final':4};
                 return (order[a]||99) - (order[b]||99);
             });
             
             let currIdx = uniqueStages.indexOf(currentMatchdayIndex);
-            if(currIdx === -1 && uniqueStages.length > 0) currIdx = 0; // Default to first
+            if(currIdx === -1 && uniqueStages.length > 0) currIdx = 0; 
             
             let newIdx = currIdx + delta;
             if(newIdx >= 0 && newIdx < uniqueStages.length) {
@@ -509,13 +532,12 @@
             
             const displayVal = document.getElementById('currentMatchdayDisplay');
             
-            // Filter fixtures
             let matches = [];
             if(typeof currentMatchdayIndex === 'number') {
                 displayVal.innerText = `MATCHDAY ${currentMatchdayIndex}`;
                 matches = appData.fixtures.filter(f => f.matchday === currentMatchdayIndex);
             } else {
-                displayVal.innerText = currentMatchdayIndex; // e.g., "Semi-Final"
+                displayVal.innerText = currentMatchdayIndex; 
                 matches = appData.fixtures.filter(f => f.stage === currentMatchdayIndex);
             }
 
@@ -524,7 +546,6 @@
                 return;
             }
 
-            // Group by Group A/B if in group stage
             if(matches[0].stage === 'group') {
                 ['A', 'B'].forEach(gId => {
                     const gMatches = matches.filter(m => m.group === gId);
@@ -534,7 +555,6 @@
                     }
                 });
             } else {
-                // Knockout
                 matches.forEach(m => container.innerHTML += createMatchCard(m));
             }
         }
@@ -546,31 +566,56 @@
             const isKnockout = f.stage !== 'group';
             
             let centerContent = '';
+            let actionButton = '';
+
+            // 1. Check if there is a FINAL approved result
             if(r) {
-                centerContent = `<div class="match-score text-warning">${r.score1} - ${r.score2}</div><div class="small text-muted">FT</div>`;
-            } else {
+                centerContent = `<div class="match-score text-dark">${r.score1} - ${r.score2}</div><div class="small text-muted fw-bold">FINAL</div>`;
+            } 
+            else {
+                // 2. Check if there is a PENDING result
                 const pending = appData.resultsPending.find(p => p.fixtureId === f.id && p.status === 'pending');
-                if(pending) centerContent = `<div class="badge bg-warning text-dark mb-1">Pending</div><div class="small">${pending.score1}-${pending.score2}</div>`;
-                else centerContent = `<div class="text-muted small">VS</div>`;
+                
+                if(pending) {
+                    centerContent = `
+                        <div class="match-score" style="color: #bbb;">${pending.score1} - ${pending.score2}</div>
+                        <div class="badge bg-light text-muted border" style="font-size: 0.65rem;">Pending Admin...</div>
+                    `;
+                } else {
+                    // 3. No result yet, show VS or Submit Button
+                    centerContent = `<div class="fw-bold text-muted">VS</div>`;
+                    
+                    // Only show Submit Button if the current user matches one of the players
+                    if(sessionTeamId === f.player1Id || sessionTeamId === f.player2Id) {
+                        actionButton = `
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-success px-3 fw-bold" onclick="openPlayerSubmit('${f.id}')" style="font-size: 0.7rem; letter-spacing: 1px;">
+                                    SUBMIT RESULT
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
             }
 
-            // Action Buttons
-            let actions = '';
-            if(isAdmin) actions += `<button class="btn btn-sm btn-dark ms-2" onclick="showResultModal('${f.id}')"><i class="fa-solid fa-pen"></i></button>`;
-            if(!r && (sessionTeamId === f.player1Id || sessionTeamId === f.player2Id)) {
-                actions += `<button class="btn btn-sm btn-outline-success ms-2" onclick="openPlayerSubmit('${f.id}')"><i class="fa-solid fa-check"></i></button>`;
-            }
+            // Admin manual override button
+            let adminEdit = isAdmin ? `<button class="btn btn-xs text-primary" style="font-size:0.6rem" onclick="showResultModal('${f.id}')">[Admin Edit]</button>` : '';
 
             return `
                 <div class="match-card ${isKnockout?'knockout':''}">
                     <div class="match-player justify-content-start">
-                        ${getContact(p1)} <img src="${p1.avatar}"> <span>${p1.name}</span>
+                         <img src="${p1.avatar}"> <span>${p1.name}</span>
                     </div>
-                    <div class="match-center">${centerContent}</div>
+                    
+                    <div class="match-center d-flex flex-column align-items-center">
+                        ${centerContent}
+                        ${actionButton}
+                        ${adminEdit}
+                    </div>
+                    
                     <div class="match-player justify-content-end text-end">
-                        <span>${p2.name}</span> <img src="${p2.avatar}"> ${getContact(p2)}
+                        <span>${p2.name}</span> <img src="${p2.avatar}">
                     </div>
-                    <div style="position:absolute; right:5px; bottom:5px;">${actions}</div>
                 </div>
             `;
         }
@@ -587,7 +632,6 @@
             appData.resultsPending = [];
             appData.currentStage = 'group';
 
-            // 1. Shuffle and Assign Groups
             const players = appData.players.map(p => p.id).sort(() => 0.5 - Math.random());
             if(players.length < 2) return showToast("Need more players", "warning");
             
@@ -601,7 +645,6 @@
                 else p.groupId = null;
             });
 
-            // 2. Generate Group Fixtures
             const generateGroupFixtures = (pList, gName) => {
                 if(pList.length % 2 !== 0) pList.push('BYE');
                 const n = pList.length;
@@ -614,7 +657,7 @@
                         if(h !== 'BYE' && a !== 'BYE') {
                             appData.fixtures.push({
                                 id: `${Date.now()}-${gName}-${r}-${i}`,
-                                player1Id: r%2===1 ? a : h, // Alternate home/away slightly
+                                player1Id: r%2===1 ? a : h,
                                 player2Id: r%2===1 ? h : a,
                                 matchday: r,
                                 group: gName,
@@ -623,7 +666,7 @@
                             });
                         }
                     }
-                    pList.splice(1, 0, pList.pop()); // Round robin rotation
+                    pList.splice(1, 0, pList.pop()); 
                 }
             };
 
@@ -639,11 +682,9 @@
             if(!isAdmin) return;
             if(!confirm("End Group Stage and Generate Knockouts?")) return;
 
-            // Logic: Top 2 from A and Top 2 from B
             const getTop2 = (gid) => {
                 return appData.players.filter(p => p.groupId === gid)
                 .map(p => {
-                    // Quick stats calc
                     let pts=0, gd=0, gf=0;
                     appData.results.forEach(r => {
                         const f = appData.fixtures.find(fx => fx.id === r.fixtureId);
@@ -664,17 +705,12 @@
 
             if(topA.length < 2 || topB.length < 2) return showToast("Not enough matches played", "warning");
 
-            // Generate Semi-Finals: A1 vs B2, B1 vs A2
             const sf1 = { id: `sf-${Date.now()}-1`, player1Id: topA[0].id, player2Id: topB[1].id, stage: 'Semi-Final', matchday: 'Semi-Final' };
             const sf2 = { id: `sf-${Date.now()}-2`, player1Id: topB[0].id, player2Id: topA[1].id, stage: 'Semi-Final', matchday: 'Semi-Final' };
 
-            appData.fixtures = appData.fixtures.filter(f => f.stage === 'group'); // Keep group history
+            appData.fixtures = appData.fixtures.filter(f => f.stage === 'group'); 
             appData.fixtures.push(sf1, sf2);
             appData.currentStage = 'knockout';
-            
-            // Generate Final Placeholder? Or wait for results?
-            // Let's wait. Admin adds Final manually or we automate next step.
-            // For this scope, let's just do Semis.
             
             await saveData();
             currentMatchdayIndex = 'Semi-Final';
@@ -723,7 +759,6 @@
             appData.results = appData.results.filter(r => r.fixtureId !== fid);
             appData.results.push({ fixtureId: fid, player1Id: appData.fixtures.find(f=>f.id===fid).player1Id, player2Id: appData.fixtures.find(f=>f.id===fid).player2Id, score1: s1, score2: s2, timestamp: Date.now() });
             
-            // Check for Final generation
             const f = appData.fixtures.find(x => x.id === fid);
             if(f.stage === 'Semi-Final') checkForFinalGen();
 
@@ -737,12 +772,10 @@
             const semiResults = appData.results.filter(r => semis.some(s => s.id === r.fixtureId));
             
             if(semis.length === 2 && semiResults.length === 2) {
-                // Determine winners
                 const getWinner = (res) => res.score1 > res.score2 ? res.player1Id : res.player2Id;
                 const w1 = getWinner(semiResults[0]);
                 const w2 = getWinner(semiResults[1]);
                 
-                // Check if final exists
                 if(!appData.fixtures.find(f => f.stage === 'Final')) {
                     appData.fixtures.push({
                         id: `final-${Date.now()}`,
@@ -762,15 +795,7 @@
             if(p.phone) html += `<a href="tel:${p.phone}" class="contact-btn btn-call"><i class="fa-solid fa-phone"></i></a>`;
             return html;
         }
-        function setupTheme() {
-            const t = localStorage.getItem('theme') || 'dark';
-            document.body.setAttribute('data-theme', t);
-            document.getElementById('theme-toggle').addEventListener('click', () => {
-                const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-                document.body.setAttribute('data-theme', n);
-                localStorage.setItem('theme', n);
-            });
-        }
+        
         function showToast(msg, type) {
             const c = document.getElementById('toast-container');
             const el = document.createElement('div');
@@ -834,22 +859,50 @@
             appData.players.forEach(p => {
                 c.innerHTML += `
                     <div class="col">
-                        <div class="card p-3 text-center h-100">
+                        <div class="card p-3 text-center h-100 position-relative">
                             <img src="${p.avatar}" style="width:70px;height:70px;border-radius:50%;margin:0 auto;" class="mb-2 border border-2 border-primary">
                             <h6 class="text-truncate">${p.name}</h6>
                             <div class="badge bg-secondary mb-2">${p.groupId ? 'Group '+p.groupId : 'No Group'}</div>
                             <div class="d-flex justify-content-center">${getContact(p)}</div>
+                            ${isAdmin ? `<button class="btn btn-sm btn-light position-absolute top-0 end-0 m-2" onclick="openEditPlayerModal('${p.id}')"><i class="fa-solid fa-pen"></i></button>` : ''}
                         </div>
                     </div>`;
             });
         }
+
+        // --- NEW EDIT PLAYER FUNCTIONS ---
+        function openEditPlayerModal(pid) {
+            const p = getPlayer(pid);
+            if(!p) return;
+            document.getElementById('editPlayerId').value = pid;
+            document.getElementById('editPlayerName').value = p.name;
+            document.getElementById('editPlayerAvatarUrl').value = p.avatar === defaultAvatar ? '' : p.avatar;
+            document.getElementById('editPlayerSocialLink').value = p.social || '';
+            document.getElementById('editPlayerPhone').value = p.phone || '';
+            new bootstrap.Modal(document.getElementById('editPlayerModal')).show();
+        }
+
+        async function submitEditPlayer() {
+            const pid = document.getElementById('editPlayerId').value;
+            const pIndex = appData.players.findIndex(x => x.id === pid);
+            if(pIndex === -1) return;
+
+            appData.players[pIndex].name = document.getElementById('editPlayerName').value;
+            appData.players[pIndex].avatar = document.getElementById('editPlayerAvatarUrl').value || defaultAvatar;
+            appData.players[pIndex].social = document.getElementById('editPlayerSocialLink').value;
+            appData.players[pIndex].phone = document.getElementById('editPlayerPhone').value;
+
+            await saveData();
+            bootstrap.Modal.getInstance(document.getElementById('editPlayerModal')).hide();
+            refreshUI();
+            showToast("Player updated successfully", "success");
+        }
+        
         function renderHistory() {
-            // Simple history implementation
             const t = document.getElementById('trophyContainer');
             if(appData.history.length === 0) t.innerHTML = '<p class="text-center text-muted">No history yet.</p>';
         }
         
-        // FIXED: Updated Ticker to show meaningful text when data loads but no matches exist
         function updateTicker() {
             const t = document.getElementById('tickerContent');
             if(appData.results.length === 0) {
@@ -864,7 +917,6 @@
 
         async function endSeasonManual() {
             if(!isAdmin || !confirm("Archive Season?")) return;
-            // Archive logic here (omitted for brevity, simply resets)
             appData.season++;
             appData.fixtures = [];
             appData.results = [];
@@ -948,5 +1000,4 @@
         }
     </script>
 </body>
-
 </html>
