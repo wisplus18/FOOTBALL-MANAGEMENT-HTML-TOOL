@@ -1,1175 +1,951 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Football Mobile League</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>E-Football Tournament</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
     <style>
         :root {
-            --primary-color: #007bff;
-            --secondary-color: #00c6ff;
-            --gold-accent: #ffd700;
-            --stadium-green: #28a745;
-            --danger-red: #dc3545;
-            --grey: #6c757d;
-            --bg-main: #121212;
-            --bg-light: #1e1e1e;
+            --primary-color: #90ff10;
+            --secondary-color: #beff6c;
+            --danger-red: #ff4d4d;
+            --bg-main: #181818; 
+            --bg-light: #222222; 
             --bg-lighter: #2a2a2a;
             --text-primary: #ffffff;
-            --text-secondary: #b3b3b3;
-            --border-color: #444;
-            --hero-bg-url: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ0B2QqQBUD8Akh6MnwQcaLUBu5jg_hsiTryVPQbrG4CQ&s=10');
+            --text-secondary: #aaaaaa;
+            --border-color: #3a3a3a;
+            --hero-bg-url: url('stadium.jpg'); 
         }
 
         body[data-theme="light"] {
             --bg-main: #f0f2f5;
             --bg-light: #ffffff;
             --bg-lighter: #f8f9fa;
-            --text-primary: #212529;
-            --text-secondary: #6c757d;
+            --text-primary: #181818;
+            --text-secondary: #555555;
             --border-color: #dee2e6;
+            --primary-color: #008f5a; 
+            --secondary-color: #00b371;
         }
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-primary);
-            transition: background-color 0.3s ease, color 0.3s ease;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-
-        /* --- Navbar --- */
-        .navbar {
-            background-color: var(--bg-light);
-            border-bottom: 1px solid var(--border-color);
-            padding: 1rem 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-color) !important;
-            display: flex;
-            align-items: center;
-        }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-main); color: var(--text-primary); transition: 0.3s; overflow-x: hidden; min-height: 100vh; padding-bottom: 70px; }
         
-        .navbar-brand svg {
-            width: 40px;
-            height: 40px;
-            margin-right: 10px;
-        }
+        /* Navbar */
+        .custom-navbar { background-color: var(--bg-light); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000; padding: 0.5rem 0; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .custom-nav-container { display: flex; align-items: center; padding: 0 15px; gap: 15px; overflow-x: auto; white-space: nowrap; }
+        .custom-nav-brand { font-size: 1.2rem; font-weight: 900; color: var(--primary-color); margin-right: 15px; text-decoration: none; }
+        .custom-nav-item { color: var(--text-secondary); font-weight: 500; text-decoration: none; padding: 8px 12px; border-radius: 20px; transition: 0.3s; font-size: 0.9rem; text-transform: uppercase; }
+        .custom-nav-item:hover, .custom-nav-item.active { background-color: rgba(144, 255, 16, 0.1); color: var(--primary-color); }
 
-        .nav-link {
-            color: var(--text-secondary) !important;
-            font-weight: 500;
-            padding: 10px 15px;
-            transition: color 0.3s;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-        }
+        /* Hero */
+        .hero { background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.8)), var(--hero-bg-url); background-size: cover; background-position: center; color: white; text-align: center; padding: 60px 60px; border-bottom: 2px solid var(--primary-color); transition: background-image 0.5s ease-in-out; }
+        .hero h1 { font-size: 2.5rem; font-weight: 900; text-transform: uppercase; }
 
-        .nav-link:hover, .nav-link.active {
-            color: var(--primary-color) !important;
-        }
+        /* ADS SYSTEM STYLES */
+        .ads-section { background: var(--bg-lighter); padding: 15px 0; border-bottom: 1px solid var(--border-color); overflow: hidden; position: relative; min-height: 120px; display: flex; align-items: center; }
+        .ad-container { width: 100%; max-width: 800px; margin: 0 auto; text-align: center; animation: fadeInAd 0.5s ease-in-out; }
+        @keyframes fadeInAd { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .ad-content { display: flex; align-items: center; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .ad-image { max-height: 180px; max-width: 520px; border-radius: 5px; object-fit: contain; background: white; padding: 2px; }
+        .ad-text h5 { margin: 0; color: var(--primary-color); font-weight: 700; font-size: 1.1rem; }
+        .ad-text p { margin: 0; font-size: 0.9rem; color: var(--text-secondary); max-width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mini-ads-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
+        .mini-ad { background: var(--bg-lighter); border: 1px solid var(--border-color); padding: 5px 10px; border-radius: 4px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.2s; max-width: 200px; }
+        .mini-ad:hover { border-color: var(--primary-color); transform: translateY(-2px); }
+        .mini-ad img { width: 60px; height: 80px; object-fit: contain; border-radius: 2px; }
+        .mini-ad span { font-size: 0.75rem; color: var(--text-secondary); font-weight: bold; }
 
-        .btn-outline-primary {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .btn-outline-primary:hover {
-            color: #fff;
-            background-color: var(--primary-color);
-        }
+        /* General UI */
+        .section-title { color: var(--primary-color); font-weight: 700; font-size: 1.8rem; margin-bottom: 20px; text-transform: uppercase; text-align: center; }
+        .card { background-color: var(--bg-light); border: 1px solid var(--border-color); color: var(--text-primary); }
+        .nav-pills .nav-link { color: var(--text-secondary); background-color: var(--bg-lighter); margin: 0 5px; border: 1px solid var(--border-color); }
+        .nav-pills .nav-link.active { background-color: var(--primary-color); color: var(--bg-main); font-weight: 700; }
         
-        #theme-toggle {
-            font-size: 1.1rem;
-            line-height: 1;
-        }
+        /* League Table */
+        .league-table { background-color: var(--bg-light); color: var(--text-primary); }
+        .league-table thead th { background-color: var(--bg-lighter); color: var(--primary-color); border-bottom: 2px solid var(--primary-color); }
+        .league-table td { border-bottom-color: var(--border-color); vertical-align: middle; }
+        .group-nav { display: flex; justify-content: space-between; align-items: center; background: var(--bg-lighter); padding: 10px; border-radius: 8px 8px 0 0; border: 1px solid var(--border-color); border-bottom: none; }
+        .group-title { font-weight: 900; font-size: 1.5rem; color: var(--primary-color); text-transform: uppercase; margin: 0; }
 
-        /* --- Hero Section --- */
-        .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.8)), var(--hero-bg-url);
-            background-size: cover;
-            background-position: center;
-            color: white;
-            text-align: center;
-            padding: 100px 20px 80px 20px;
-            border-bottom: 2px solid var(--primary-color);
-            min-height: 400px;
-        }
-
-        .hero h1 {
-            font-size: 3rem;
-            font-weight: 900;
-            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
-            text-transform: uppercase;
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            max-width: 650px;
-            margin: 20px auto 30px auto;
-            font-weight: 300;
-        }
+        /* Matches */
+        .match-card { background-color: var(--bg-lighter); border-radius: 15px; padding: 1rem; margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; position: relative; border-left: 5px solid var(--primary-color); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .match-card.knockout { border-left-color: var(--danger-red); background: linear-gradient(90deg, rgba(255, 77, 77, 0.05), transparent); }
+        .match-player img { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; margin: 0 5px; border: 2px solid var(--border-color); }
+        .match-player { display: flex; align-items: center; width: 40%; font-size: 0.9rem; font-weight: 500; }
+        .match-center { width: 20%; text-align: center; }
+        .match-score { font-size: 1.4rem; font-weight: 900; letter-spacing: 2px; }
         
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            padding: 12px 30px;
-            font-weight: 700;
-            text-transform: uppercase;
-            transition: all 0.3s;
-            font-size: 1rem;
-        }
+        .admin-mode, .sub-admin-mode { display: none; }
+        .contact-btn { width: 24px; height: 24px; border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin: 0 2px; color: white; text-decoration: none; font-size: 0.7rem; }
+        .btn-wa { background-color: #25D366; } .btn-call { background-color: #007bff; }
 
-        .btn-primary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);
-        }
-
-        /* --- Section Styling --- */
-        section {
-            padding: 60px 0;
-            transition: background-color 0.3s ease;
-        }
-        section:nth-of-type(odd) {
-            background-color: var(--bg-light);
-        }
-        
-        .section-title {
-            color: var(--primary-color);
-            font-weight: 700;
-            font-size: 2.2rem;
-            margin-bottom: 40px;
-            text-align: center;
-            text-transform: uppercase;
-        }
-        
-        /* --- Card Styling --- */
-        .card {
-            background-color: var(--bg-light);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-        }
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        /* --- Standings Table --- */
-        .league-table {
-            background-color: var(--bg-light);
-            border-color: var(--border-color);
-            color: var(--text-primary);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .league-table thead th {
-            background-color: var(--bg-lighter);
-            color: var(--primary-color);
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
-        }
-        
-        .league-table tbody tr:hover {
-            background-color: var(--bg-lighter);
-        }
-        
-        .league-table th, .league-table td {
-            vertical-align: middle;
-            padding: 0.9rem 0.75rem;
-            border-bottom-color: var(--border-color);
-        }
-        
-        .player-name-cell {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 500;
-        }
-        
-        .player-name-cell img {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--border-color);
-        }
-
-        .pos-cell { font-weight: 700; font-size: 1.1rem; width: 40px; text-align: center; }
-        .pts-cell { font-weight: 700; font-size: 1.1rem; }
-
-        .form-cell .form-bubble {
-            display: inline-block;
-            width: 22px;
-            height: 22px;
-            line-height: 22px;
-            text-align: center;
-            border-radius: 50%;
-            font-weight: 700;
-            font-size: 0.8rem;
-            color: #fff;
-            margin: 0 1px;
-        }
-        .form-bubble-W { background-color: var(--stadium-green); }
-        .form-bubble-D { background-color: var(--grey); }
-        .form-bubble-L { background-color: var(--danger-red); }
-
-        .top-team-row { border-left: 4px solid var(--gold-accent); }
-        .mid-team-row { border-left: 4px solid var(--primary-color); }
-        .bottom-team-row { border-left: 4px solid var(--danger-red); }
-
-        /* --- Matches Section --- */
-        .matchday-nav {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        .matchday-nav h4 { color: var(--text-primary); font-weight: 500; margin: 0; width: 150px; text-align: center; }
-        
-        .match-card {
-            background-color: var(--bg-lighter);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .match-card:hover {
-            transform: translateY(-3px);
-            border-color: var(--primary-color);
-        }
-        .match-card.played {
-            border-color: var(--stadium-green);
-        }
-
-        .match-player {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            width: 40%;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-        .match-player img {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            object-fit: cover;
-            background-color: var(--bg-main);
-        }
-        .match-player:last-of-type {
-            justify-content: flex-end;
-            text-align: right;
-        }
-        
-        .match-info { text-align: center; width: 20%; }
-        .match-info .score { 
-            font-size: 2rem; 
-            font-weight: 900; 
-            color: var(--text-primary); 
-            letter-spacing: 2px;
-        }
-        .match-info .score .winner { color: var(--gold-accent); }
-        .match-info .vs { font-size: 1.2rem; font-weight: 700; color: var(--primary-color); }
-        .match-info .date { font-size: 0.85rem; color: var(--text-secondary); }
-
-        /* --- Players Section --- */
-        .player-card {
-            background-color: var(--bg-lighter);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            text-align: center;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-        }
-        .player-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.15);
-        }
-        .player-card img {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin: 0 auto 1rem auto;
-            border: 3px solid var(--primary-color);
-            background-color: var(--bg-main);
-        }
-        .player-card .card-title { font-size: 1.3rem; font-weight: 700; color: var(--primary-color); }
-
-        /* --- Modal Styling --- */
-        .modal-content {
-            background-color: var(--bg-light);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-        .modal-header, .modal-footer {
-            border-bottom-color: var(--border-color);
-            border-top-color: var(--border-color);
-        }
-        body[data-theme="light"] .btn-close {
-            filter: none;
-        }
-
-        .form-control, .form-select {
-            background-color: var(--bg-main);
-            border-color: var(--border-color);
-            color: var(--text-primary);
-        }
-        .form-control:focus, .form-select:focus {
-            background-color: var(--bg-main);
-            border-color: var(--primary-color);
-            color: var(--text-primary);
-            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
-        }
-
-        .result-modal-scores { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 1rem;
-            margin: 2rem 0;
-        }
-        .result-modal-scores input { 
-            width: 80px; 
-            font-size: 2rem; 
-            font-weight: 700; 
-            text-align: center; 
-        }
-        .result-modal-vs { font-size: 1.5rem; font-weight: 700; color: var(--primary-color); }
-
-        /* --- Settings Panel --- */
-        .settings-panel {
-            background-color: var(--bg-lighter);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 2rem;
-        }
-        .settings-panel h5 {
-            color: var(--primary-color);
-            margin-bottom: 1.5rem;
-            text-align: center;
-        }
-
-        /* Toast Styling */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1090;
-        }
-
-        /* Mobile Optimization */
         @media (max-width: 768px) {
-            .hero h1 { font-size: 2.2rem; }
-            .hero p { font-size: 1rem; }
-            .navbar-brand { font-size: 1.2rem; }
-            
-            .match-card { flex-direction: column; gap: 1rem; padding: 1rem; }
-            .match-player { width: 100%; font-size: 1rem; }
-            .match-player:last-of-type { justify-content: flex-start; text-align: left; }
-            .match-info { width: 100%; display: flex; justify-content: space-between; align-items: center; }
-            .match-info .score { font-size: 1.8rem; }
-            .match-info .vs { order: 2; }
-            .match-info .date { order: 1; }
-            
-            .table-responsive { border-radius: 10px; }
-            .table { font-size: 0.85rem; }
-            .player-name-cell img { width: 30px; height: 30px; }
-            
-            .table th:nth-child(7), .table td:nth-child(7), /* GF */
-            .table th:nth-child(8), .table td:nth-child(8), /* GA */
-            .table th:nth-child(10), .table td:nth-child(10) /* Form */
-            {
-                display: none;
-            }
+            .match-player { flex-direction: column; text-align: center; gap: 5px; }
+            .match-player img { width: 40px; height: 40px; }
+            .match-card { padding: 10px 5px; }
         }
     </style>
 </head>
 <body>
-    <div class="toast-container" id="toast-container"></div>
 
-    <nav class="navbar navbar-expand-lg sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#007bff">
-                    <path d="M50,0A50,50,0,1,0,50,100,50,50,0,0,0,50,0ZM76.4,26.66l-6.85,6.85a28,28,0,0,1-13.7,11.37L50,50,44.15,44.88a28,28,0,0,1-11.37-13.7L25.93,23.6A38.56,38.56,0,0,1,50,11.5a38.16,38.16,0,0,1,26.4,15.16ZM23.6,74.07l6.85-6.85a28,28,0,0,1,13.7-11.37L50,50,55.85,55.12a28,28,0,0,1,11.37,13.7l6.85,6.85A38.56,38.56,0,0,1,50,88.5,38.16,38.16,0,0,1,23.6,74.07Z"/>
-                </svg>
-                E-FOOTBALL LEAGUE
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+    <div class="toast-container position-fixed top-0 end-0 p-3" id="toast-container" style="z-index: 1100;"></div>
+
+    <nav class="custom-navbar">
+        <div class="custom-nav-container">
+            <a href="#" class="custom-nav-brand"><i class="fa-solid fa-futbol me-2"></i> TOURNAMENT</a>
+            <a href="#league-section" class="custom-nav-item active"><i class="fa-solid fa-layer-group"></i> Tournament</a>
+            <a href="#players" class="custom-nav-item"><i class="fa-solid fa-users"></i> Players</a>
+            <a href="#trophyRoom" class="custom-nav-item"><i class="fa-solid fa-award"></i> History</a>
+            <button class="btn btn-sm btn-outline-light ms-auto" id="theme-toggle"><i class="fa-solid fa-sun"></i></button>
+            <button class="btn btn-sm btn-outline-primary ms-2" id="admin-login-button"><i class="fa-solid fa-lock"></i></button>
+            <button class="btn btn-sm btn-outline-danger ms-2 admin-mode" onclick="showPendingModal()">
+                <i class="fa-solid fa-inbox"></i> <span id="pendingCountBadge" class="badge bg-danger rounded-pill" style="display:none">0</span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#standings">Standings</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#matches">Matches</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#players">Players</a></li>
-                    <li class="nav-item">
-                        <button class="btn nav-link" id="theme-toggle" aria-label="Toggle theme">
-                            <i class="fa-solid fa-sun"></i>
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="btn btn-outline-primary ms-2" onclick="showSettings()">
-                            <i class="fa-solid fa-gear me-1"></i> Settings
-                        </button>
-                    </li>
-                </ul>
-            </div>
         </div>
     </nav>
 
+    <div id="liveTicker" style="background: linear-gradient(90deg, var(--primary-color), var(--secondary-color)); color: var(--bg-main); padding: 5px; font-weight: 700; white-space: nowrap; overflow: hidden;">
+        <span class="live-ticker-content" id="tickerContent" style="display: inline-block; animation: tickerSlide 35s linear infinite;">Loading...</span>
+    </div>
+    <style>@keyframes tickerSlide { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }</style>
+
     <section class="hero">
         <div class="container">
-            <h1>EFOOTBALL LEAGUE SEASON 1</h1>
-            <p>Welcome to the Competitive E-Football League</p>
-            <a href="#standings" class="btn btn-primary">View Standings</a>
+            <h1 id="heroTitle">LOADING...</h1>
+            <p class="lead">GROUP STAGE & KNOCKOUT TOURNAMENT</p>
         </div>
     </section>
 
-    <!-- Settings Modal -->
-    <div class="modal fade" id="settingsModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">League Settings</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-4">
-                        <h6 class="mb-3">Manage Players</h6>
-                        <div class="mb-3">
-                            <label for="playerName" class="form-label">Player Name</label>
-                            <input type="text" id="playerName" class="form-control" placeholder="Enter player name">
+    <section class="ads-section" id="mainAdsSection">
+        <div class="ad-container" id="adContainer">
+            </div>
+    </section>
+
+    <section id="league-section" class="py-5">
+        <div class="container">
+            
+            <ul class="nav nav-pills mb-4 justify-content-center" id="pills-tab" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#pills-standings"><i class="fa-solid fa-list-ol me-1"></i> Standings</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#pills-fixtures"><i class="fa-solid fa-calendar-days me-1"></i> Matches</button></li>
+            </ul>
+
+            <div class="tab-content">
+                
+                <div class="tab-pane fade show active" id="pills-standings">
+                    
+                    <div id="standings-mini-ads" class="mini-ads-row"></div>
+
+                    <div class="card p-0 mb-4 border-0">
+                        <div class="group-nav">
+                            <button class="btn btn-outline-secondary" onclick="switchGroupView('prev')"><i class="fa-solid fa-chevron-left"></i></button>
+                            <h3 class="group-title" id="groupTitleDisplay">GROUP A</h3>
+                            <button class="btn btn-outline-secondary" onclick="switchGroupView('next')"><i class="fa-solid fa-chevron-right"></i></button>
                         </div>
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary" onclick="addPlayer()">
-                                <i class="fa-solid fa-user-plus me-1"></i> Add Player
-                            </button>
-                            <button class="btn btn-danger" onclick="removeSelectedPlayer()">
-                                <i class="fa-solid fa-user-minus me-1"></i> Remove Selected Player
-                            </button>
-                        </div>
-                        <div class="mt-3">
-                            <label for="playerSelect" class="form-label">Select Player</label>
-                            <select id="playerSelect" class="form-select"></select>
+                        <div class="table-responsive">
+                            <table class="table league-table table-striped mb-0">
+                                <thead><tr><th>#</th><th>Player</th><th>MP</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>
+                                <tbody id="standingsTable"></tbody>
+                            </table>
                         </div>
                     </div>
                     
-                    <div class="mb-4">
-                        <h6 class="mb-3">Generate Fixtures</h6>
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-success" onclick="generateFixtures('single')">
-                                <i class="fa-solid fa-calendar me-1"></i> Single Round Robin
-                            </button>
-                            <button class="btn btn-info" onclick="generateFixtures('double')">
-                                <i class="fa-solid fa-calendar-alt me-1"></i> Double Round Robin
-                            </button>
-                        </div>
+                    <div class="admin-mode text-center">
+                        <button class="btn btn-sm btn-primary m-1" onclick="showAddPlayerModal()">Add Player</button>
+                        <button class="btn btn-sm btn-info m-1 text-white" onclick="showEditBackgroundModal()">Set BG</button>
+                        <button class="btn btn-sm btn-danger m-1" onclick="endSeasonManual()">End Season</button>
+                        <button class="btn btn-sm btn-warning m-1" onclick="generateSeason('double')">Re-Generate Groups (Double)</button>
+                        <button class="btn btn-sm btn-warning m-1" onclick="generateKnockouts()">Start Knockouts</button>
                     </div>
+                </div>
+
+                <div class="tab-pane fade" id="pills-fixtures">
                     
-                    <div class="mt-4">
-                        <h6 class="mb-3">League Management</h6>
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-warning" onclick="resetLeague()">
-                                <i class="fa-solid fa-trash me-1"></i> Reset League
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <div id="fixtures-mini-ads" class="mini-ads-row"></div>
 
-    <!-- Result Modal -->
-    <div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Enter Match Result</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="resultFixtureId">
-                    <div class="text-center mb-3">
-                        <h6 id="resultModalPlayer1Name">Player 1</h6>
+                    <div class="d-flex justify-content-center align-items-center gap-3 mb-3">
+                        <button class="btn btn-sm btn-primary" onclick="changeMatchday(-1)"><i class="fa-solid fa-arrow-left"></i></button>
+                        <h4 id="currentMatchdayDisplay" class="m-0 text-uppercase">Matchday 1</h4>
+                        <button class="btn btn-sm btn-primary" onclick="changeMatchday(1)"><i class="fa-solid fa-arrow-right"></i></button>
                     </div>
-                    <div class="result-modal-scores">
-                        <input type="number" id="resultScore1" class="form-control" min="0" value="0">
-                        <span class="result-modal-vs">-</span>
-                        <input type="number" id="resultScore2" class="form-control" min="0" value="0">
-                    </div>
-                    <div class="text-center mt-3">
-                        <h6 id="resultModalPlayer2Name">Player 2</h6>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="submitResult()">Save Result</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Player Avatar Modal -->
-    <div class="modal fade" id="avatarModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Select Player Avatar</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="avatarPlayerId">
-                    <div class="mb-3">
-                        <label class="form-label">Choose image from gallery</label>
-                        <input type="file" id="avatarFile" class="form-control" accept="image/*" capture="environment">
-                        <small class="text-muted">Select an image from your device</small>
-                    </div>
-                    <div class="mt-3 text-center">
-                        <button class="btn btn-primary" onclick="uploadAvatar()">
-                            <i class="fa-solid fa-upload me-1"></i> Set Avatar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                    <div id="fixturesContainer"></div>
 
-    <section id="standings" class="py-5">
-        <div class="container">
-            <h2 class="section-title">Standings</h2>
-            <div class="card">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table league-table table-striped mb-0">
-                            <thead>
-                                <tr>
-                                    <th scope="col" class="pos-cell">#</th>
-                                    <th scope="col" style="width: 30%;">Player</th>
-                                    <th scope="col">MP</th>
-                                    <th scope="col">W</th>
-                                    <th scope="col">D</th>
-                                    <th scope="col">L</th>
-                                    <th scope="col">GF</th>
-                                    <th scope="col">GA</th>
-                                    <th scope="col">GD</th>
-                                    <th scope="col" class="form-cell">Form</th>
-                                    <th scope="col" class="pts-cell">Pts</th>
-                                </tr>
-                            </thead>
-                            <tbody id="standingsTable"></tbody>
-                        </table>
+                    <div class="admin-mode mt-4 text-center">
+                        <button class="btn btn-primary m-1" onclick="showAddFixtureModal()">Add Fixture</button>
+                        <button class="btn btn-info m-1 text-white" onclick="openGenerateModal()">Auto-Generate Groups</button>
+                        <button class="btn btn-danger m-1" onclick="forceAutoForfeits()">Force Auto-Resolve</button>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
 
-    <section id="matches" class="py-5">
-        <div class="container">
-            <h2 class="section-title">Matches</h2>
-            <div class="matchday-nav">
-                <button class="btn btn-primary" onclick="changeMatchday(-1)">
-                    <i class="fa-solid fa-arrow-left"></i>
-                </button>
-                <h4 id="currentMatchday">Matchday 1</h4>
-                <button class="btn btn-primary" onclick="changeMatchday(1)">
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </div>
-            <div id="matchesContainer"></div>
-        </div>
-    </section>
-
-    <section id="players" class="py-5">
+    <section id="players" class="py-5 bg-light">
         <div class="container">
             <h2 class="section-title">Players</h2>
-            <div class="row" id="playersContainer"></div>
+             <div id="players-mini-ads" class="mini-ads-row"></div>
+            <div class="row row-cols-2 row-cols-md-4 g-4" id="playersContainer"></div>
         </div>
     </section>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Default avatar (SVG data URL)
-        const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%236c757d'%3E%3Cpath d='M50,0A50,50,0,1,0,50,100,50,50,0,0,0,50,0ZM50,15A35,35,0,1,1,15,50,35,35,0,0,1,50,15ZM50,25A10,10,0,1,1,40,35,10,10,0,0,1,50,25ZM50,80a27,27,0,0,1-25-12.87c.2-8.3,16.72-12.93,25-12.93s24.8,4.63,25,12.93A27,27,0,0,1,50,80Z'/%3E%3C/svg%3E";
+    <section id="trophyRoom" class="py-5">
+        <div class="container">
+            <h2 class="section-title text-warning"><i class="fa-solid fa-award"></i> Hall of Fame</h2>
+            <div class="d-flex justify-content-center mb-3" id="trophySeasonTabs"></div>
+            <div id="trophyContainer"></div>
+        </div>
+    </section>
 
-        // League data stored locally
-        let leagueData = {
-            players: [],
-            fixtures: [],
-            results: [],
-            settings: {
-                currentMatchday: 1,
-                totalMatchdays: 1
+    <div class="modal fade" id="adModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: var(--bg-light); color: var(--text-primary); border: 1px solid var(--primary-color);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="adModalTitle">Sponsor</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="adModalImg" src="" class="img-fluid rounded mb-3" style="max-height: 200px; display:none;">
+                    <p id="adModalDesc" class="mb-4"></p>
+                    <div id="adModalLinks" class="d-grid gap-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="adminModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Admin Login</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="password" id="adminPassword" class="form-control" placeholder="Enter Password"></div><div class="modal-footer"><button class="btn btn-primary" onclick="loginAdmin()">Login</button></div></div></div></div>
+    
+    <div class="modal fade" id="generateLeagueModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Generate Groups</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body text-center"><p>System will shuffle players into Group A and Group B (Max 4 each).</p><button class="btn btn-primary w-100 mb-2" onclick="generateSeason('double')">Double Round (Home & Away)</button><button class="btn btn-secondary w-100" onclick="generateSeason('single')">Single Round (1 Match)</button></div></div></div></div>
+
+    <div class="modal fade" id="resultModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Enter Result</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body text-center"><input type="hidden" id="resultMatchId"><div class="d-flex justify-content-center align-items-center gap-2"><label id="resultPlayer1Name">P1</label><input type="number" id="resultScore1" class="form-control w-25 text-center"><span class="fw-bold">VS</span><input type="number" id="resultScore2" class="form-control w-25 text-center"><label id="resultPlayer2Name">P2</label></div></div><div class="modal-footer"><button class="btn btn-primary" onclick="submitResult()">Submit</button></div></div></div></div>
+
+    <div class="modal fade" id="playerSubmitModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Submit Result</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body text-center"><input type="hidden" id="ps_fixtureId"><div class="mb-2 text-start"><small class="text-muted">Confirm teams:</small></div><select id="ps_homeSelect" class="form-select mb-2"></select><select id="ps_awaySelect" class="form-select mb-2"></select><div class="d-flex justify-content-center gap-2"><input type="number" id="ps_score1" class="form-control w-25 text-center" placeholder="0"><span class="fw-bold align-self-center">VS</span><input type="number" id="ps_score2" class="form-control w-25 text-center" placeholder="0"></div></div><div class="modal-footer"><button class="btn btn-primary" onclick="submitPlayerResult()">Submit Result</button></div></div></div></div>
+
+    <div class="modal fade" id="pendingModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Pending Results</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="d-flex justify-content-end mb-2"><button class="btn btn-success fw-bold" onclick="approveAllPending()">APPROVE ALL</button></div><div id="pendingListContent" style="max-height: 50vh; overflow-y: auto;"></div></div></div></div></div>
+
+    <div class="modal fade" id="sessionTeamModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Select Your Team</h5></div><div class="modal-body text-center"><select id="sessionTeamSelect" class="form-select mb-3"><option value="">-- Choose Team --</option></select><button class="btn btn-primary w-100" onclick="setSessionTeam()">Select Team</button><button class="btn btn-outline-secondary w-100 mt-2" onclick="skipSessionTeam()">View Only</button></div></div></div></div>
+    
+    <div class="modal fade" id="addPlayerModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add Player</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="text" id="playerName" class="form-control mb-2" placeholder="Name"><input type="url" id="playerAvatarUrl" class="form-control mb-2" placeholder="Avatar URL"><input type="url" id="playerSocialLink" class="form-control mb-2" placeholder="WhatsApp Link"><input type="tel" id="playerPhone" class="form-control" placeholder="Phone Number"></div><div class="modal-footer"><button class="btn btn-primary" onclick="submitPlayer()">Add</button></div></div></div></div>
+    
+    <div class="modal fade" id="editBackgroundModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Background</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><input type="url" id="backgroundUrl" class="form-control" placeholder="Image URL"></div><div class="modal-footer"><button class="btn btn-primary" onclick="submitBackground()">Save</button></div></div></div></div>
+    
+    <div class="modal fade" id="addFixtureModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Add Fixture</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><select id="fixturePlayer1" class="form-select mb-2"></select><select id="fixturePlayer2" class="form-select mb-2"></select><input type="date" id="fixtureDate" class="form-control mb-2"><input type="number" id="fixtureMatchday" class="form-control" placeholder="Matchday" value="1"><select id="fixtureStage" class="form-select"><option value="group">Group Stage</option><option value="Semi-Final">Semi-Final</option><option value="Final">Final</option></select></div><div class="modal-footer"><button class="btn btn-primary" onclick="submitFixture()">Add</button></div></div></div></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // --- ADS CONFIGURATION ---
+        const ADS_CONFIG = [
+            {
+                id: 1,
+                name: "INTERNET KITONGA 🔥",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ_3Kz3CPWYrxcMICkT184B-P9EM5KPF8ihIHK94JAV1A&s=10",
+                desc: "Karbu ujipatie mabando ya bei chei , pesa kidogo GB kama zoote 👑 muda wowote , n Mwezi hadu mwaka mzima 🔥",
+                contact: {
+                    whatsapp: "https://wa.me/255755532988",
+                    phone: "+255755532988",
+                    //website: 
+                }
+            },
+            {
+                id: 2,
+                name: "BE THE KING👑",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDOERUVozLhGlVdLNdkGFQDaQHKfutKTK1SDMbKPU-oIG_m6VW_wL5DhF-&s=10",
+                desc: " Usipoteze pesa ndefu kununua mabando madogo madogo kila sku 🔥✨",
+                contact: {
+                whatsapp: "https://wa.me/255755532988",
+                phone: "+255755532988",
+                    //website: "https://example.com/energy"
+                    }
+                },
+            {
+                id: 3,
+                name: "USITESEKE TENA KIFURUSHI CHOCHOTE🔥",
+                image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSO30HKcvvG8JLTdLGJhY-nU_760KEo4DTRCLfSr5wip8Gy7KggTao2BIw&s=10",
+                desc: " Kifurushi chochote , dakika , sms , GB  etc vyote vya MWEZ MZIMA HATA MWAKA UKITAKA🔥✨",
+                contact: {
+                whatsapp: "https://wa.me/255755532988",
+                phone: "+255755532988",
+                    //website: "https://example.com/energy"
+                }
             }
+        ];
+
+        // --- FIREBASE SETUP ---
+        const firebaseConfig = { apiKey: "AIzaSyCLycBxpQ3MMIDLYjmBqMZv32FIu2eDXF4", authDomain: "efootball-app-ce90b.firebaseapp.com", projectId: "efootball-app-ce90b", storageBucket: "efootball-app-ce90b.firebasestorage.app", messagingSenderId: "387933114333", appId: "1:387933114333:web:1c85dbadacf70d0406b034" };
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // --- STATE MANAGEMENT ---
+        let appData = { 
+            season: 1, 
+            history: [], 
+            players: [], // Player now has { ..., groupId: 'A' | 'B' }
+            fixtures: [], // Fixture now has { ..., stage: 'group'|'Semi-Final'|'Final', group: 'A'|'B' }
+            results: [], 
+            resultsPending: [],
+            backgroundUrl: 'url("stadium.jpg")',
+            currentStage: 'group' // 'group', 'knockout'
         };
 
-        // Current matchday
-        let currentMatchday = 1;
-        let totalMatchdays = 1;
+        let currentGroupView = 'A';
+        let currentMatchdayIndex = 1; 
+        let currentAdIndex = 0;
+        let sessionTeamId = null;
+        let isAdmin = false;
+        let password = "Genie";
+        const defaultAvatar = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%236c757d'%3E%3Cpath d='M50,0A50,50,0,1,0,50,100,50,50,0,0,0,50,0ZM50,20c11,0,20,9,20,20S61,60,50,60,30,51,30,40,39,20,50,20Zm0,70C34,90,20,80,20,65c0-10,15-20,30-20s30,10,30,20C80,80,66,90,50,90Z'/%3E%3C/svg%3E";
 
-        // Load data from localStorage
-        function loadData() {
-            const saved = localStorage.getItem('efootballLeague');
-            if (saved) {
-                leagueData = JSON.parse(saved);
-                currentMatchday = leagueData.settings.currentMatchday || 1;
-                totalMatchdays = leagueData.settings.totalMatchdays || 1;
-            }
-            updateAllViews();
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setupTheme();
+            setupAds();
+            loadData();
+            document.getElementById('admin-login-button').addEventListener('click', () => new bootstrap.Modal(document.getElementById('adminModal')).show());
+        });
+
+        // --- ADS ENGINE ---
+        function setupAds() {
+            renderMainAd();
+            renderMiniAds();
+            setInterval(() => {
+                currentAdIndex = (currentAdIndex + 1) % ADS_CONFIG.length;
+                renderMainAd();
+            }, 4000);
         }
 
-        // Save data to localStorage
-        function saveData() {
-            leagueData.settings.currentMatchday = currentMatchday;
-            leagueData.settings.totalMatchdays = totalMatchdays;
-            localStorage.setItem('efootballLeague', JSON.stringify(leagueData));
-        }
-
-        // Toast notification
-        function showToast(message, type = 'info') {
-            const toastHtml = `
-                <div class="toast align-items-center text-white bg-${type} border-0" role="alert" data-bs-delay="3000">
-                    <div class="d-flex">
-                        <div class="toast-body">${message}</div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        function renderMainAd() {
+            const ad = ADS_CONFIG[currentAdIndex];
+            if(!ad) return;
+            const container = document.getElementById('adContainer');
+            // Re-trigger animation
+            container.style.animation = 'none';
+            container.offsetHeight; /* trigger reflow */
+            container.style.animation = null; 
+            
+            container.innerHTML = `
+                <div class="ad-content">
+                    <img src="${ad.image}" class="ad-image" alt="${ad.name}">
+                    <div class="ad-text text-start">
+                        <h5>${ad.name} <span class="badge bg-warning text-dark" style="font-size:0.9rem">Main Sponsor</span></h5>
+                        <p>${ad.desc}</p>
                     </div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="openAdModal(${ad.id})">Read More</button>
                 </div>
             `;
-            const container = document.getElementById('toast-container');
-            const wrapper = document.createElement('div');
-            wrapper.innerHTML = toastHtml;
-            const toastEl = wrapper.firstChild;
-            container.appendChild(toastEl);
-            
-            const toast = new bootstrap.Toast(toastEl);
-            toast.show();
-            
-            toastEl.addEventListener('hidden.bs.toast', () => {
-                toastEl.remove();
-            });
         }
 
-        // Theme toggle
-        const themeToggle = document.getElementById('theme-toggle');
-        function applyTheme(theme) {
-            if (theme === 'light') {
-                document.body.dataset.theme = 'light';
-                themeToggle.innerHTML = '<i class="fa-solid fa-moon"></i>';
-                localStorage.setItem('theme', 'light');
-            } else {
-                delete document.body.dataset.theme;
-                themeToggle.innerHTML = '<i class="fa-solid fa-sun"></i>';
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = localStorage.getItem('theme') || 'light';
-            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
-        });
-
-        // Update all views
-        function updateAllViews() {
-            updateStandings();
-            updateMatches();
-            updatePlayers();
-            populatePlayerSelect();
-            calculateTotalMatchdays();
-        }
-
-        // Calculate total matchdays
-        function calculateTotalMatchdays() {
-            const matchdays = leagueData.fixtures.map(f => f.matchday);
-            totalMatchdays = matchdays.length > 0 ? Math.max(...matchdays) : 1;
-            if (currentMatchday > totalMatchdays) {
-                currentMatchday = totalMatchdays;
-            }
-            document.getElementById('currentMatchday').textContent = `Matchday ${currentMatchday}`;
-        }
-
-        // Recalculate standings
-        function recalculateStandings() {
-            // Reset all player stats
-            leagueData.players.forEach(player => {
-                player.mp = 0; player.w = 0; player.d = 0; player.l = 0;
-                player.gf = 0; player.ga = 0; player.gd = 0; player.pts = 0; player.form = [];
-            });
-
-            // Process all results
-            leagueData.results.forEach(result => {
-                const p1 = leagueData.players.find(p => p.id === result.player1Id);
-                const p2 = leagueData.players.find(p => p.id === result.player2Id);
-
-                if (!p1 || !p2) return;
-
-                // Update Player 1
-                p1.mp++; p1.gf += result.score1; p1.ga += result.score2;
-                if (result.score1 > result.score2) {
-                    p1.w++; p1.pts += 3; p1.form.unshift('W');
-                } else if (result.score1 < result.score2) {
-                    p1.l++; p1.form.unshift('L');
-                } else {
-                    p1.d++; p1.pts += 1; p1.form.unshift('D');
-                }
-
-                // Update Player 2
-                p2.mp++; p2.gf += result.score2; p2.ga += result.score1;
-                if (result.score2 > result.score1) {
-                    p2.w++; p2.pts += 3; p2.form.unshift('W');
-                } else if (result.score2 < result.score1) {
-                    p2.l++; p2.form.unshift('L');
-                } else {
-                    p2.d++; p2.pts += 1; p2.form.unshift('D');
-                }
-            });
-
-            // Keep only last 5 form results and calculate GD
-            leagueData.players.forEach(player => {
-                player.form = player.form.slice(0, 5);
-                player.gd = player.gf - player.ga;
-            });
-        }
-
-        // Update standings table
-        function updateStandings() {
-            recalculateStandings();
-            const tableBody = document.getElementById('standingsTable');
-            tableBody.innerHTML = '';
-
-            // Sort players
-            const sortedPlayers = [...leagueData.players].sort((a, b) => {
-                if (b.pts !== a.pts) return b.pts - a.pts;
-                if (b.gd !== a.gd) return b.gd - a.gd;
-                if (b.gf !== a.gf) return b.gf - a.gf;
-                return a.name.localeCompare(b.name);
-            });
-
-            sortedPlayers.forEach((player, index) => {
-                let rowClass = '';
-                if (index < 3) rowClass = 'top-team-row';
-                else if (index >= sortedPlayers.length - 3) rowClass = 'bottom-team-row';
-
-                const formHtml = player.form.map(f => 
-                    `<span class="form-bubble form-bubble-${f}">${f}</span>`
-                ).join('');
-
-                const row = `
-                    <tr class="${rowClass}">
-                        <td class="pos-cell">${index + 1}</td>
-                        <td class="player-name-cell">
-                            <img src="${player.avatar || defaultAvatar}" alt="${player.name}" onclick="changeAvatar('${player.id}')" style="cursor: pointer;">
-                            <span>${player.name}</span>
-                        </td>
-                        <td>${player.mp}</td>
-                        <td>${player.w}</td>
-                        <td>${player.d}</td>
-                        <td>${player.l}</td>
-                        <td>${player.gf}</td>
-                        <td>${player.ga}</td>
-                        <td>${player.gd}</td>
-                        <td class="form-cell">${formHtml}</td>
-                        <td class="pts-cell">${player.pts}</td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
-        }
-
-        // Update matches display
-        function updateMatches() {
-            const container = document.getElementById('matchesContainer');
-            container.innerHTML = '';
-
-            const matches = leagueData.fixtures
-                .filter(f => f.matchday === currentMatchday)
-                .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-            if (matches.length === 0) {
-                container.innerHTML = `
-                    <div class="text-center text-secondary py-4">
-                        <i class="fa-solid fa-calendar-xmark fa-3x mb-3"></i>
-                        <p>No matches scheduled for this matchday.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            matches.forEach(fixture => {
-                const p1 = leagueData.players.find(p => p.id === fixture.player1Id);
-                const p2 = leagueData.players.find(p => p.id === fixture.player2Id);
-                const result = leagueData.results.find(r => r.fixtureId === fixture.id);
-
-                if (!p1 || !p2) return;
-
-                const dateDisplay = fixture.date.includes('TBD') ? fixture.date : new Date(fixture.date).toLocaleDateString();
-                const isPlayed = !!result;
-                const cardClass = isPlayed ? 'match-card played' : 'match-card';
-
-                let scoreHtml = `<span class="vs">VS</span>`;
-                if (isPlayed) {
-                    const winner1Class = result.score1 > result.score2 ? 'winner' : '';
-                    const winner2Class = result.score2 > result.score1 ? 'winner' : '';
-                    scoreHtml = `
-                        <div class="score">
-                            <span class="${winner1Class}">${result.score1}</span> - 
-                            <span class="${winner2Class}">${result.score2}</span>
+        function renderMiniAds() {
+            const targets = ['standings-mini-ads', 'fixtures-mini-ads', 'players-mini-ads'];
+            targets.forEach(tid => {
+                const el = document.getElementById(tid);
+                if(!el) return;
+                el.innerHTML = '';
+                // Take first 3 ads
+                ADS_CONFIG.slice(0,3).forEach(ad => {
+                    el.innerHTML += `
+                        <div class="mini-ad" onclick="openAdModal(${ad.id})">
+                            <img src="${ad.image}">
+                            <span>${ad.name}</span>
                         </div>
                     `;
+                });
+            });
+        }
+
+        window.openAdModal = function(id) {
+            const ad = ADS_CONFIG.find(a => a.id === id);
+            if(!ad) return;
+            document.getElementById('adModalTitle').innerText = ad.name;
+            document.getElementById('adModalDesc').innerText = ad.desc;
+            const img = document.getElementById('adModalImg');
+            img.src = ad.image;
+            img.style.display = 'inline-block';
+            
+            const linksDiv = document.getElementById('adModalLinks');
+            linksDiv.innerHTML = '';
+            if(ad.contact) {
+                if(ad.contact.whatsapp) linksDiv.innerHTML += `<a href="${ad.contact.whatsapp}" target="_blank" class="btn btn-success"><i class="fa-brands fa-whatsapp"></i> Chat on WhatsApp</a>`;
+                if(ad.contact.phone) linksDiv.innerHTML += `<a href="${ad.contact.phone}" class="btn btn-secondary"><i class="fa-solid fa-phone"></i> Call Now</a>`;
+                if(ad.contact.website) linksDiv.innerHTML += `<a href="${ad.contact.website}" target="_blank" class="btn btn-primary"><i class="fa-solid fa-globe"></i> Visit Website</a>`;
+            }
+
+            new bootstrap.Modal(document.getElementById('adModal')).show();
+        };
+
+        // --- DATA LOGIC ---
+        async function loadData() {
+            try {
+                // FIXED: Reverted to 'data' to load your existing previous players/background
+                const doc = await db.collection('league').doc('data').get();
+                if (doc.exists) {
+                    const loadedData = doc.data();
+                    appData = { ...appData, ...loadedData };
+                    
+                    // Migration Check: If loaded players don't have groupId (from old version), add null
+                    if(appData.players) {
+                        appData.players.forEach(p => {
+                            if(typeof p.groupId === 'undefined') p.groupId = null;
+                        });
+                    }
+                } else {
+                    await saveData();
                 }
-
-                const card = `
-                    <div class="${cardClass}" onclick="showResultModal('${fixture.id}')">
-                        <div class="match-player">
-                            <img src="${p1.avatar || defaultAvatar}" alt="${p1.name}">
-                            <span>${p1.name}</span>
-                        </div>
-                        <div class="match-info">
-                            ${scoreHtml}
-                            <span class="date">${dateDisplay}</span>
-                        </div>
-                        <div class="match-player">
-                            <span>${p2.name}</span>
-                            <img src="${p2.avatar || defaultAvatar}" alt="${p2.name}">
-                        </div>
-                    </div>
-                `;
-                container.innerHTML += card;
-            });
+                
+                applySettings();
+                promptSessionTeam();
+                refreshUI();
+            } catch (e) { console.error(e); showToast("Load Error", "danger"); }
         }
 
-        // Update players display
-        function updatePlayers() {
-            const container = document.getElementById('playersContainer');
+        async function saveData() {
+            try { await db.collection('league').doc('data').set(appData); } catch (e) { showToast("Save Error", "danger"); }
+        }
+
+        function refreshUI() {
+            document.getElementById('heroTitle').innerText = `WISPLUS CHAMPIONS `;
+            updateStandings();
+            renderFixtures();
+            renderPlayers();
+            renderHistory();
+            updateTicker();
+            document.getElementById('pendingCountBadge').innerText = appData.resultsPending.filter(p=>p.status==='pending').length;
+            document.getElementById('pendingCountBadge').style.display = appData.resultsPending.length ? 'inline-block' : 'none';
+            document.querySelectorAll('.admin-mode').forEach(el => el.style.display = isAdmin ? 'inline-block' : 'none');
+        }
+
+        // --- GROUP & LEAGUE LOGIC ---
+        function switchGroupView(dir) {
+            if(dir === 'next') currentGroupView = currentGroupView === 'A' ? 'B' : 'A';
+            else currentGroupView = currentGroupView === 'A' ? 'B' : 'A'; // Only 2 groups, so prev/next toggle same way
+            updateStandings();
+        }
+
+        function updateStandings() {
+            document.getElementById('groupTitleDisplay').innerText = `GROUP ${currentGroupView}`;
+            
+            // Calculate Stats
+            appData.players.forEach(p => { p.mp=0; p.w=0; p.d=0; p.l=0; p.gf=0; p.ga=0; p.pts=0; });
+            appData.results.forEach(r => {
+                const fixture = appData.fixtures.find(f => f.id === r.fixtureId);
+                if(fixture && fixture.stage === 'group') {
+                    const p1 = appData.players.find(p => p.id === r.player1Id);
+                    const p2 = appData.players.find(p => p.id === r.player2Id);
+                    if(p1 && p2) {
+                        p1.mp++; p2.mp++;
+                        p1.gf+=r.score1; p1.ga+=r.score2;
+                        p2.gf+=r.score2; p2.ga+=r.score1;
+                        if(r.score1 > r.score2) { p1.w++; p1.pts+=3; p2.l++; }
+                        else if(r.score1 < r.score2) { p2.w++; p2.pts+=3; p1.l++; }
+                        else { p1.d++; p1.pts++; p2.d++; p2.pts++; }
+                    }
+                }
+            });
+
+            const tbody = document.getElementById('standingsTable');
+            tbody.innerHTML = '';
+            
+            // Filter by current group and Sort
+            const groupPlayers = appData.players
+                .filter(p => p.groupId === currentGroupView)
+                .sort((a,b) => b.pts - a.pts || (b.gf-b.ga) - (a.gf-a.ga) || b.gf - a.gf);
+
+            groupPlayers.forEach((p, i) => {
+                const gd = p.gf - p.ga;
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold">${i+1}</td>
+                        <td class="d-flex align-items-center"><img src="${p.avatar}" style="width:25px;height:25px;border-radius:50%;margin-right:5px;"> ${p.name}</td>
+                        <td>${p.mp}</td><td>${p.w}</td><td>${p.d}</td><td>${p.l}</td>
+                        <td>${p.gf}</td><td>${p.ga}</td><td>${gd>0?'+'+gd:gd}</td>
+                        <td class="fw-bold text-warning">${p.pts}</td>
+                    </tr>
+                `;
+            });
+
+            if(groupPlayers.length === 0) tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">No players assigned to Group ' + currentGroupView + ' yet. Use "Auto-Generate Groups".</td></tr>';
+        }
+
+        // --- FIXTURES LOGIC ---
+        function changeMatchday(delta) {
+            // Find max matchday or round
+            // Simply update index and re-render. Logic handles displaying "Round of 16" etc based on index mapping if needed
+            // For simplicity in this requirement, we group by matchday (numbers) and rounds (strings)
+            // We will just iterate through available unique matchdays/stages
+            const uniqueStages = [...new Set(appData.fixtures.map(f => f.matchday || f.stage))];
+            // Sort: Numbers first, then strings
+            uniqueStages.sort((a,b) => {
+                const isANum = !isNaN(a), isBNum = !isNaN(b);
+                if(isANum && isBNum) return a - b;
+                if(isANum) return -1;
+                if(isBNum) return 1;
+                // Custom order for strings
+                const order = {'group':0, 'Round of 16':1, 'Quarter-Final':2, 'Semi-Final':3, 'Final':4};
+                return (order[a]||99) - (order[b]||99);
+            });
+            
+            let currIdx = uniqueStages.indexOf(currentMatchdayIndex);
+            if(currIdx === -1 && uniqueStages.length > 0) currIdx = 0; // Default to first
+            
+            let newIdx = currIdx + delta;
+            if(newIdx >= 0 && newIdx < uniqueStages.length) {
+                currentMatchdayIndex = uniqueStages[newIdx];
+                renderFixtures();
+            }
+        }
+
+        function renderFixtures() {
+            const container = document.getElementById('fixturesContainer');
             container.innerHTML = '';
+            
+            const displayVal = document.getElementById('currentMatchdayDisplay');
+            
+            // Filter fixtures
+            let matches = [];
+            if(typeof currentMatchdayIndex === 'number') {
+                displayVal.innerText = `MATCHDAY ${currentMatchdayIndex}`;
+                matches = appData.fixtures.filter(f => f.matchday === currentMatchdayIndex);
+            } else {
+                displayVal.innerText = currentMatchdayIndex; // e.g., "Semi-Final"
+                matches = appData.fixtures.filter(f => f.stage === currentMatchdayIndex);
+            }
 
-            if (leagueData.players.length === 0) {
-                container.innerHTML = `
-                    <div class="col-12 text-center py-5">
-                        <i class="fa-solid fa-users fa-3x mb-3 text-secondary"></i>
-                        <p class="text-secondary">No players added yet. Use Settings to add players.</p>
+            if(matches.length === 0) {
+                container.innerHTML = '<p class="text-center text-muted">No matches scheduled.</p>';
+                return;
+            }
+
+            // Group by Group A/B if in group stage
+            if(matches[0].stage === 'group') {
+                ['A', 'B'].forEach(gId => {
+                    const gMatches = matches.filter(m => m.group === gId);
+                    if(gMatches.length > 0) {
+                        container.innerHTML += `<h6 class="text-primary border-bottom border-secondary pb-1 mt-3 mb-2">GROUP ${gId}</h6>`;
+                        gMatches.forEach(m => container.innerHTML += createMatchCard(m));
+                    }
+                });
+            } else {
+                // Knockout
+                matches.forEach(m => container.innerHTML += createMatchCard(m));
+            }
+        }
+
+        function createMatchCard(f) {
+            const p1 = getPlayer(f.player1Id);
+            const p2 = getPlayer(f.player2Id);
+            const r = appData.results.find(x => x.fixtureId === f.id);
+            const isKnockout = f.stage !== 'group';
+            
+            let centerContent = '';
+            if(r) {
+                centerContent = `<div class="match-score text-warning">${r.score1} - ${r.score2}</div><div class="small text-muted">FT</div>`;
+            } else {
+                const pending = appData.resultsPending.find(p => p.fixtureId === f.id && p.status === 'pending');
+                if(pending) centerContent = `<div class="badge bg-warning text-dark mb-1">Pending</div><div class="small">${pending.score1}-${pending.score2}</div>`;
+                else centerContent = `<div class="text-muted small">VS</div>`;
+            }
+
+            // Action Buttons
+            let actions = '';
+            if(isAdmin) actions += `<button class="btn btn-sm btn-dark ms-2" onclick="showResultModal('${f.id}')"><i class="fa-solid fa-pen"></i></button>`;
+            if(!r && (sessionTeamId === f.player1Id || sessionTeamId === f.player2Id)) {
+                actions += `<button class="btn btn-sm btn-outline-success ms-2" onclick="openPlayerSubmit('${f.id}')"><i class="fa-solid fa-check"></i></button>`;
+            }
+
+            return `
+                <div class="match-card ${isKnockout?'knockout':''}">
+                    <div class="match-player justify-content-start">
+                        ${getContact(p1)} <img src="${p1.avatar}"> <span>${p1.name}</span>
                     </div>
-                `;
-                return;
-            }
-
-            leagueData.players.forEach(player => {
-                const card = `
-                    <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
-                        <div class="player-card">
-                            <img src="${player.avatar || defaultAvatar}" alt="${player.name}" 
-                                 onclick="changeAvatar('${player.id}')" style="cursor: pointer;">
-                            <h5 class="card-title">${player.name}</h5>
-                            <p class="card-text">${player.pts} PTS | ${player.mp} Played</p>
-                        </div>
+                    <div class="match-center">${centerContent}</div>
+                    <div class="match-player justify-content-end text-end">
+                        <span>${p2.name}</span> <img src="${p2.avatar}"> ${getContact(p2)}
                     </div>
-                `;
-                container.innerHTML += card;
+                    <div style="position:absolute; right:5px; bottom:5px;">${actions}</div>
+                </div>
+            `;
+        }
+
+        // --- GENERATION LOGIC ---
+        async function generateSeason(type) {
+            if(!isAdmin) return;
+            bootstrap.Modal.getInstance(document.getElementById('generateLeagueModal')).hide();
+            
+            if(!confirm("Start new season? This clears current fixtures.")) return;
+            
+            appData.fixtures = [];
+            appData.results = [];
+            appData.resultsPending = [];
+            appData.currentStage = 'group';
+
+            // 1. Shuffle and Assign Groups
+            const players = appData.players.map(p => p.id).sort(() => 0.5 - Math.random());
+            if(players.length < 2) return showToast("Need more players", "warning");
+            
+            const mid = Math.ceil(players.length / 2);
+            const groupA = players.slice(0, mid);
+            const groupB = players.slice(mid);
+            
+            appData.players.forEach(p => {
+                if(groupA.includes(p.id)) p.groupId = 'A';
+                else if(groupB.includes(p.id)) p.groupId = 'B';
+                else p.groupId = null;
             });
+
+            // 2. Generate Group Fixtures
+            const generateGroupFixtures = (pList, gName) => {
+                if(pList.length % 2 !== 0) pList.push('BYE');
+                const n = pList.length;
+                const rounds = type === 'single' ? n-1 : (n-1)*2;
+                
+                for(let r=1; r<=rounds; r++) {
+                    for(let i=0; i<n/2; i++) {
+                        const h = pList[i];
+                        const a = pList[n-1-i];
+                        if(h !== 'BYE' && a !== 'BYE') {
+                            appData.fixtures.push({
+                                id: `${Date.now()}-${gName}-${r}-${i}`,
+                                player1Id: r%2===1 ? a : h, // Alternate home/away slightly
+                                player2Id: r%2===1 ? h : a,
+                                matchday: r,
+                                group: gName,
+                                stage: 'group',
+                                date: new Date().toISOString()
+                            });
+                        }
+                    }
+                    pList.splice(1, 0, pList.pop()); // Round robin rotation
+                }
+            };
+
+            generateGroupFixtures([...groupA], 'A');
+            generateGroupFixtures([...groupB], 'B');
+
+            await saveData();
+            refreshUI();
+            showToast("Season Generated!", "success");
         }
 
-        // Populate player select dropdown
-        function populatePlayerSelect() {
-            const select = document.getElementById('playerSelect');
-            select.innerHTML = '<option value="">Select a player...</option>';
-            leagueData.players.forEach(player => {
-                const option = document.createElement('option');
-                option.value = player.id;
-                option.textContent = player.name;
-                select.appendChild(option);
-            });
+        async function generateKnockouts() {
+            if(!isAdmin) return;
+            if(!confirm("End Group Stage and Generate Knockouts?")) return;
+
+            // Logic: Top 2 from A and Top 2 from B
+            const getTop2 = (gid) => {
+                return appData.players.filter(p => p.groupId === gid)
+                .map(p => {
+                    // Quick stats calc
+                    let pts=0, gd=0, gf=0;
+                    appData.results.forEach(r => {
+                        const f = appData.fixtures.find(fx => fx.id === r.fixtureId);
+                        if(f && f.stage==='group') {
+                            const s1=r.score1, s2=r.score2;
+                            if(f.player1Id===p.id) { gf+=s1; gd+=(s1-s2); pts+=(s1>s2?3:s1==s2?1:0); }
+                            if(f.player2Id===p.id) { gf+=s2; gd+=(s2-s1); pts+=(s2>s1?3:s1==s2?1:0); }
+                        }
+                    });
+                    return { ...p, pts, gd, gf };
+                })
+                .sort((a,b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf)
+                .slice(0, 2);
+            };
+
+            const topA = getTop2('A');
+            const topB = getTop2('B');
+
+            if(topA.length < 2 || topB.length < 2) return showToast("Not enough matches played", "warning");
+
+            // Generate Semi-Finals: A1 vs B2, B1 vs A2
+            const sf1 = { id: `sf-${Date.now()}-1`, player1Id: topA[0].id, player2Id: topB[1].id, stage: 'Semi-Final', matchday: 'Semi-Final' };
+            const sf2 = { id: `sf-${Date.now()}-2`, player1Id: topB[0].id, player2Id: topA[1].id, stage: 'Semi-Final', matchday: 'Semi-Final' };
+
+            appData.fixtures = appData.fixtures.filter(f => f.stage === 'group'); // Keep group history
+            appData.fixtures.push(sf1, sf2);
+            appData.currentStage = 'knockout';
+            
+            // Generate Final Placeholder? Or wait for results?
+            // Let's wait. Admin adds Final manually or we automate next step.
+            // For this scope, let's just do Semis.
+            
+            await saveData();
+            currentMatchdayIndex = 'Semi-Final';
+            refreshUI();
         }
 
-        // Change matchday
-        function changeMatchday(direction) {
-            const newMatchday = currentMatchday + direction;
-            if (newMatchday >= 1 && newMatchday <= totalMatchdays) {
-                currentMatchday = newMatchday;
-                document.getElementById('currentMatchday').textContent = `Matchday ${currentMatchday}`;
-                updateMatches();
-                saveData();
-            }
+        // --- PLAYER/ADMIN ACTIONS ---
+        function loginAdmin() {
+            if(document.getElementById('adminPassword').value === password) {
+                isAdmin = true;
+                bootstrap.Modal.getInstance(document.getElementById('adminModal')).hide();
+                refreshUI();
+                showToast("Admin Logged In", "success");
+            } else showToast("Wrong Password", "danger");
         }
 
-        // Show settings modal
-        function showSettings() {
-            const modal = new bootstrap.Modal(document.getElementById('settingsModal'));
-            modal.show();
-        }
-
-        // Add player
-        function addPlayer() {
-            const nameInput = document.getElementById('playerName');
-            const name = nameInput.value.trim();
-
-            if (!name) {
-                showToast('Please enter a player name', 'danger');
-                return;
-            }
-
-            if (leagueData.players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-                showToast('Player already exists', 'warning');
-                return;
-            }
-
-            const newPlayer = {
+        async function submitPlayer() {
+            const name = document.getElementById('playerName').value;
+            if(!name) return;
+            appData.players.push({
                 id: Date.now().toString(),
                 name: name,
-                avatar: defaultAvatar,
-                mp: 0, w: 0, d: 0, l: 0,
-                gf: 0, ga: 0, gd: 0, pts: 0, form: []
-            };
-
-            leagueData.players.push(newPlayer);
-            nameInput.value = '';
-            saveData();
-            updateAllViews();
-            showToast(`Player "${name}" added successfully!`, 'success');
+                avatar: document.getElementById('playerAvatarUrl').value || defaultAvatar,
+                social: document.getElementById('playerSocialLink').value,
+                phone: document.getElementById('playerPhone').value,
+                groupId: null
+            });
+            await saveData();
+            bootstrap.Modal.getInstance(document.getElementById('addPlayerModal')).hide();
+            refreshUI();
         }
 
-        // Remove selected player
-        function removeSelectedPlayer() {
-            const select = document.getElementById('playerSelect');
-            const playerId = select.value;
-
-            if (!playerId) {
-                showToast('Please select a player to remove', 'warning');
-                return;
-            }
-
-            const player = leagueData.players.find(p => p.id === playerId);
-            if (!player) return;
-
-            if (confirm(`Remove ${player.name}? This will also delete all their matches and results.`)) {
-                // Remove player
-                leagueData.players = leagueData.players.filter(p => p.id !== playerId);
-                
-                // Remove fixtures involving this player
-                leagueData.fixtures = leagueData.fixtures.filter(f => 
-                    f.player1Id !== playerId && f.player2Id !== playerId
-                );
-                
-                // Remove results involving this player
-                leagueData.results = leagueData.results.filter(r => 
-                    r.player1Id !== playerId && r.player2Id !== playerId
-                );
-                
-                saveData();
-                updateAllViews();
-                showToast(`Player "${player.name}" removed`, 'success');
-            }
+        function showResultModal(fid) {
+            const f = appData.fixtures.find(x => x.id === fid);
+            document.getElementById('resultMatchId').value = fid;
+            document.getElementById('resultPlayer1Name').innerText = getPlayer(f.player1Id).name;
+            document.getElementById('resultPlayer2Name').innerText = getPlayer(f.player2Id).name;
+            new bootstrap.Modal(document.getElementById('resultModal')).show();
         }
 
-        // Generate fixtures
-        function generateFixtures(type) {
-            if (leagueData.players.length < 2) {
-                showToast('Need at least 2 players to generate fixtures', 'warning');
-                return;
-            }
-
-            // Clear existing fixtures and results
-            leagueData.fixtures = [];
-            leagueData.results = [];
-
-            const players = leagueData.players.map(p => p.id);
-            let numRounds = type === 'double' ? (players.length - 1) * 2 : players.length - 1;
+        async function submitResult() {
+            const fid = document.getElementById('resultMatchId').value;
+            const s1 = parseInt(document.getElementById('resultScore1').value);
+            const s2 = parseInt(document.getElementById('resultScore2').value);
             
-            // Generate round robin schedule
-            for (let round = 1; round <= numRounds; round++) {
-                for (let i = 0; i < players.length / 2; i++) {
-                    const p1 = players[i];
-                    const p2 = players[players.length - 1 - i];
-                    
-                    if (p1 && p2) {
-                        const homeId = round % 2 === 1 ? p1 : p2;
-                        const awayId = round % 2 === 1 ? p2 : p1;
-
-                        const fixture = {
-                            id: `${Date.now()}-${round}-${i}`,
-                            player1Id: homeId,
-                            player2Id: awayId,
-                            date: `Matchday ${round}`,
-                            matchday: round,
-                            isPlayed: false
-                        };
-                        leagueData.fixtures.push(fixture);
-                    }
-                }
-                
-                // Rotate players
-                players.splice(1, 0, players.pop());
-            }
-
-            currentMatchday = 1;
-            saveData();
-            updateAllViews();
-            showToast(`${type === 'double' ? 'Double' : 'Single'} round robin fixtures generated!`, 'success');
-        }
-
-        // Show result modal
-        function showResultModal(fixtureId) {
-            const fixture = leagueData.fixtures.find(f => f.id === fixtureId);
-            if (!fixture) return;
-
-            const p1 = leagueData.players.find(p => p.id === fixture.player1Id);
-            const p2 = leagueData.players.find(p => p.id === fixture.player2Id);
-            const existingResult = leagueData.results.find(r => r.fixtureId === fixtureId);
-
-            document.getElementById('resultFixtureId').value = fixtureId;
-            document.getElementById('resultModalPlayer1Name').textContent = p1.name;
-            document.getElementById('resultModalPlayer2Name').textContent = p2.name;
+            appData.results = appData.results.filter(r => r.fixtureId !== fid);
+            appData.results.push({ fixtureId: fid, player1Id: appData.fixtures.find(f=>f.id===fid).player1Id, player2Id: appData.fixtures.find(f=>f.id===fid).player2Id, score1: s1, score2: s2, timestamp: Date.now() });
             
-            if (existingResult) {
-                document.getElementById('resultScore1').value = existingResult.score1;
-                document.getElementById('resultScore2').value = existingResult.score2;
-            } else {
-                document.getElementById('resultScore1').value = 0;
-                document.getElementById('resultScore2').value = 0;
-            }
+            // Check for Final generation
+            const f = appData.fixtures.find(x => x.id === fid);
+            if(f.stage === 'Semi-Final') checkForFinalGen();
 
-            const modal = new bootstrap.Modal(document.getElementById('resultModal'));
-            modal.show();
-        }
-
-        // Submit result
-        function submitResult() {
-            const fixtureId = document.getElementById('resultFixtureId').value;
-            const score1 = parseInt(document.getElementById('resultScore1').value);
-            const score2 = parseInt(document.getElementById('resultScore2').value);
-            const fixture = leagueData.fixtures.find(f => f.id === fixtureId);
-
-            if (isNaN(score1) || isNaN(score2) || score1 < 0 || score2 < 0) {
-                showToast('Please enter valid scores', 'danger');
-                return;
-            }
-
-            if (!fixture) return;
-
-            // Remove existing result if any
-            leagueData.results = leagueData.results.filter(r => r.fixtureId !== fixtureId);
-
-            // Add new result
-            const result = {
-                fixtureId: fixtureId,
-                player1Id: fixture.player1Id,
-                player2Id: fixture.player2Id,
-                score1: score1,
-                score2: score2,
-                timestamp: Date.now()
-            };
-            leagueData.results.push(result);
-
-            saveData();
-            updateAllViews();
+            await saveData();
             bootstrap.Modal.getInstance(document.getElementById('resultModal')).hide();
-            showToast('Result saved!', 'success');
+            refreshUI();
         }
 
-        // Change player avatar
-        function changeAvatar(playerId) {
-            document.getElementById('avatarPlayerId').value = playerId;
-            const modal = new bootstrap.Modal(document.getElementById('avatarModal'));
-            modal.show();
-        }
-
-        // Upload avatar from gallery
-        function uploadAvatar() {
-            const playerId = document.getElementById('avatarPlayerId').value;
-            const fileInput = document.getElementById('avatarFile');
+        function checkForFinalGen() {
+            const semis = appData.fixtures.filter(f => f.stage === 'Semi-Final');
+            const semiResults = appData.results.filter(r => semis.some(s => s.id === r.fixtureId));
             
-            if (!playerId || !fileInput.files.length) {
-                showToast('Please select an image', 'warning');
-                return;
-            }
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                const player = leagueData.players.find(p => p.id === playerId);
-                if (player) {
-                    player.avatar = e.target.result;
-                    saveData();
-                    updateAllViews();
-                    showToast('Avatar updated!', 'success');
-                    bootstrap.Modal.getInstance(document.getElementById('avatarModal')).hide();
-                    fileInput.value = '';
+            if(semis.length === 2 && semiResults.length === 2) {
+                // Determine winners
+                const getWinner = (res) => res.score1 > res.score2 ? res.player1Id : res.player2Id;
+                const w1 = getWinner(semiResults[0]);
+                const w2 = getWinner(semiResults[1]);
+                
+                // Check if final exists
+                if(!appData.fixtures.find(f => f.stage === 'Final')) {
+                    appData.fixtures.push({
+                        id: `final-${Date.now()}`,
+                        player1Id: w1, player2Id: w2,
+                        stage: 'Final', matchday: 'Final'
+                    });
                 }
-            };
-
-            reader.readAsDataURL(file);
-        }
-
-        // Reset league
-        function resetLeague() {
-            if (confirm('WARNING: This will delete ALL players, fixtures, and results. Continue?')) {
-                leagueData = {
-                    players: [],
-                    fixtures: [],
-                    results: [],
-                    settings: {
-                        currentMatchday: 1,
-                        totalMatchdays: 1
-                    }
-                };
-                currentMatchday = 1;
-                saveData();
-                updateAllViews();
-                showToast('League reset successfully', 'info');
-                bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
             }
         }
 
-        // Initialize on load
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply saved theme
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            applyTheme(savedTheme);
-            
-            // Load data
-            loadData();
-            
-            // Add some sample data if empty
-            if (leagueData.players.length === 0) {
-                leagueData.players = [
-                    {
-                        id: '1',
-                        name: 'Player 1',
-                        avatar: defaultAvatar,
-                        mp: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0, form: []
-                    },
-                    {
-                        id: '2',
-                        name: 'Player 2',
-                        avatar: defaultAvatar,
-                        mp: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, gd: 0, pts: 0, form: []
-                    }
-                ];
-                saveData();
-                updateAllViews();
+        // --- UTILS ---
+        function getPlayer(id) { return appData.players.find(p => p.id === id) || { name: 'Unknown', avatar: defaultAvatar }; }
+        function getContact(p) { 
+            if(!p) return '';
+            let html = '';
+            if(p.social) html += `<a href="${p.social}" target="_blank" class="contact-btn btn-wa"><i class="fa-brands fa-whatsapp"></i></a>`;
+            if(p.phone) html += `<a href="tel:${p.phone}" class="contact-btn btn-call"><i class="fa-solid fa-phone"></i></a>`;
+            return html;
+        }
+        function setupTheme() {
+            const t = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', t);
+            document.getElementById('theme-toggle').addEventListener('click', () => {
+                const n = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                document.body.setAttribute('data-theme', n);
+                localStorage.setItem('theme', n);
+            });
+        }
+        function showToast(msg, type) {
+            const c = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = `toast show bg-${type} text-white`;
+            el.innerHTML = `<div class="toast-body">${msg}</div>`;
+            c.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
+        function promptSessionTeam() {
+            const s = document.getElementById('sessionTeamSelect');
+            appData.players.forEach(p => s.innerHTML += `<option value="${p.id}">${p.name}</option>`);
+            new bootstrap.Modal(document.getElementById('sessionTeamModal')).show();
+        }
+        function setSessionTeam() { 
+            sessionTeamId = document.getElementById('sessionTeamSelect').value; 
+            if(sessionTeamId) {
+                showToast(`Welcome ${getPlayer(sessionTeamId).name}`, "success");
+                bootstrap.Modal.getInstance(document.getElementById('sessionTeamModal')).hide();
+                refreshUI();
             }
-        });
+        }
+        function skipSessionTeam() { bootstrap.Modal.getInstance(document.getElementById('sessionTeamModal')).hide(); }
+        
+        // --- ADMIN MODALS TRIGGERS ---
+        function showAddPlayerModal() { new bootstrap.Modal(document.getElementById('addPlayerModal')).show(); }
+        function openGenerateModal() { new bootstrap.Modal(document.getElementById('generateLeagueModal')).show(); }
+        async function submitBackground() { 
+            appData.backgroundUrl = `url('${document.getElementById('backgroundUrl').value}')`;
+            await saveData(); applySettings(); bootstrap.Modal.getInstance(document.getElementById('editBackgroundModal')).hide(); 
+        }
+        function showEditBackgroundModal() { new bootstrap.Modal(document.getElementById('editBackgroundModal')).show(); }
+        function applySettings() { document.documentElement.style.setProperty('--hero-bg-url', appData.backgroundUrl); }
+        function showAddFixtureModal() {
+            const s1 = document.getElementById('fixturePlayer1');
+            const s2 = document.getElementById('fixturePlayer2');
+            s1.innerHTML = ''; s2.innerHTML = '';
+            appData.players.forEach(p => {
+                const opt = `<option value="${p.id}">${p.name}</option>`;
+                s1.innerHTML+=opt; s2.innerHTML+=opt;
+            });
+            new bootstrap.Modal(document.getElementById('addFixtureModal')).show();
+        }
+        async function submitFixture() {
+            appData.fixtures.push({
+                id: Date.now().toString(),
+                player1Id: document.getElementById('fixturePlayer1').value,
+                player2Id: document.getElementById('fixturePlayer2').value,
+                date: document.getElementById('fixtureDate').value,
+                matchday: isNaN(parseInt(document.getElementById('fixtureMatchday').value)) ? document.getElementById('fixtureMatchday').value : parseInt(document.getElementById('fixtureMatchday').value),
+                stage: document.getElementById('fixtureStage').value
+            });
+            await saveData();
+            bootstrap.Modal.getInstance(document.getElementById('addFixtureModal')).hide();
+            refreshUI();
+        }
+        
+        // --- RENDERING OTHERS ---
+        function renderPlayers() {
+            const c = document.getElementById('playersContainer');
+            c.innerHTML = '';
+            appData.players.forEach(p => {
+                c.innerHTML += `
+                    <div class="col">
+                        <div class="card p-3 text-center h-100">
+                            <img src="${p.avatar}" style="width:70px;height:70px;border-radius:50%;margin:0 auto;" class="mb-2 border border-2 border-primary">
+                            <h6 class="text-truncate">${p.name}</h6>
+                            <div class="badge bg-secondary mb-2">${p.groupId ? 'Group '+p.groupId : 'No Group'}</div>
+                            <div class="d-flex justify-content-center">${getContact(p)}</div>
+                        </div>
+                    </div>`;
+            });
+        }
+        function renderHistory() {
+            // Simple history implementation
+            const t = document.getElementById('trophyContainer');
+            if(appData.history.length === 0) t.innerHTML = '<p class="text-center text-muted">No history yet.</p>';
+        }
+        
+        // FIXED: Updated Ticker to show meaningful text when data loads but no matches exist
+        function updateTicker() {
+            const t = document.getElementById('tickerContent');
+            if(appData.results.length === 0) {
+                t.innerText = `WELCOME TO SEASON ${appData.season} | TOURNAMENT MODE ONLINE`;
+            } else {
+                const res = appData.results.sort((a,b)=>b.timestamp-a.timestamp)[0];
+                const p1 = getPlayer(res.player1Id).name;
+                const p2 = getPlayer(res.player2Id).name;
+                t.innerText = `LATEST: ${p1} ${res.score1} - ${res.score2} ${p2} | SEASON ${appData.season}`;
+            }
+        }
+
+        async function endSeasonManual() {
+            if(!isAdmin || !confirm("Archive Season?")) return;
+            // Archive logic here (omitted for brevity, simply resets)
+            appData.season++;
+            appData.fixtures = [];
+            appData.results = [];
+            appData.resultsPending = [];
+            appData.players.forEach(p => p.groupId = null);
+            await saveData();
+            refreshUI();
+        }
+
+        // --- SUBMIT RESULT LOGIC ---
+        function openPlayerSubmit(fid) {
+             const f = appData.fixtures.find(x => x.id === fid);
+             document.getElementById('ps_fixtureId').value = fid;
+             const hS = document.getElementById('ps_homeSelect');
+             const aS = document.getElementById('ps_awaySelect');
+             const p1 = getPlayer(f.player1Id);
+             const p2 = getPlayer(f.player2Id);
+             
+             hS.innerHTML = `<option value="${p1.id}">${p1.name}</option><option value="${p2.id}">${p2.name}</option>`;
+             aS.innerHTML = `<option value="${p2.id}">${p2.name}</option><option value="${p1.id}">${p1.name}</option>`;
+             
+             new bootstrap.Modal(document.getElementById('playerSubmitModal')).show();
+        }
+
+        async function submitPlayerResult() {
+            const fid = document.getElementById('ps_fixtureId').value;
+            const s1 = parseInt(document.getElementById('ps_score1').value);
+            const s2 = parseInt(document.getElementById('ps_score2').value);
+            
+            appData.resultsPending.push({
+                id: 'p'+Date.now(), fixtureId: fid, 
+                score1: s1, score2: s2, 
+                status: 'pending', timestamp: Date.now()
+            });
+            await saveData();
+            bootstrap.Modal.getInstance(document.getElementById('playerSubmitModal')).hide();
+            showToast("Result Pending Approval", "info");
+            refreshUI();
+        }
+
+        function showPendingModal() {
+            const list = document.getElementById('pendingListContent');
+            list.innerHTML = '';
+            appData.resultsPending.filter(p=>p.status==='pending').forEach(p => {
+                const f = appData.fixtures.find(x => x.id === p.fixtureId);
+                const p1 = getPlayer(f.player1Id).name;
+                const p2 = getPlayer(f.player2Id).name;
+                list.innerHTML += `
+                    <div class="card p-2 mb-2">
+                        <div class="d-flex justify-content-between">
+                            <div><strong>${p1} vs ${p2}</strong><br>${p.score1} - ${p.score2}</div>
+                            <button class="btn btn-sm btn-success" onclick="approvePending('${p.id}')">Approve</button>
+                        </div>
+                    </div>`;
+            });
+            new bootstrap.Modal(document.getElementById('pendingModal')).show();
+        }
+
+        async function approveAllPending() {
+            const pending = appData.resultsPending.filter(p=>p.status==='pending');
+            for(let p of pending) { await approvePending(p.id, false); }
+            refreshUI();
+        }
+
+        async function approvePending(pid, refresh=true) {
+            const p = appData.resultsPending.find(x => x.id === pid);
+            if(!p) return;
+            p.status = 'approved';
+            appData.results.push({
+                fixtureId: p.fixtureId,
+                score1: p.score1, score2: p.score2,
+                player1Id: appData.fixtures.find(f=>f.id===p.fixtureId).player1Id,
+                player2Id: appData.fixtures.find(f=>f.id===p.fixtureId).player2Id,
+                timestamp: Date.now()
+            });
+            await saveData();
+            if(refresh) {
+                bootstrap.Modal.getInstance(document.getElementById('pendingModal')).hide();
+                refreshUI();
+            }
+        }
     </script>
 </body>
 </html>
